@@ -1,0 +1,15 @@
+groupId: foundations
+itemId: face_structure_and_spin
+title: Face Structure and Spin
+order: 7
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.
+
+tabs:
+  examples: false
+  validation: false

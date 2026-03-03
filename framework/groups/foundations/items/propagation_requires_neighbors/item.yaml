@@ -1,0 +1,15 @@
+groupId: foundations
+itemId: propagation_requires_neighbors
+title: Propagation Requires Neighbors
+order: 4
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for propagation requires neighbors claims.
+
+tabs:
+  examples: false
+  validation: true

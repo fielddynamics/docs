@@ -1,0 +1,11 @@
+groupId: matter_nuclear_physics
+itemId: resonance_modes
+title: Resonance Modes
+order: 5
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

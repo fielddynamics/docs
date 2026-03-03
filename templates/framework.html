@@ -1,0 +1,1402 @@
+{% extends "base.html" %}
+
+{% block title %}{% if ssr_title %}{{ ssr_title }} - Field Dynamics{% else %}FIELD DYNAMICS: Framework{% endif %}{% endblock %}
+
+{% block head %}
+    {% if ssr_description %}
+    <meta name="description" content="{{ ssr_description }}">
+    <meta property="og:title" content="{{ ssr_title }} - Field Dynamics">
+    <meta property="og:description" content="{{ ssr_description }}">
+    <meta property="og:type" content="article">
+    {% endif %}
+    {% if initial_item_id %}
+    <link rel="canonical" href="{% if viewing_version %}/v{{ viewing_version }}{% endif %}/framework/{{ initial_item_id }}/">
+    {% endif %}
+    <style>
+        .validation-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #333;
+        }
+        .validation-view-toggle {
+            display: flex;
+            margin-left: auto;
+            background: #1f2630;
+            border-radius: 999px;
+            padding: 2px;
+        }
+        .validation-view-btn {
+            padding: 5px 14px;
+            background: transparent;
+            color: #888;
+            border: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .validation-view-btn.active {
+            background: #2a78d6;
+            color: #d9edff;
+        }
+        .validation-run-btn {
+            padding: 4px 16px;
+            background: #1a5a2a;
+            color: #aaddaa;
+            border: 1px solid #2a7a3a;
+            cursor: pointer;
+            font-size: 0.8rem;
+            border-radius: 3px;
+        }
+        .validation-run-btn:hover {
+            background: #1f6a32;
+        }
+        .validation-run-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .validation-summary {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .validation-check {
+            border: 1px solid #333;
+            margin-bottom: 4px;
+            border-radius: 3px;
+            background: transparent;
+        }
+        .validation-check-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            background: transparent;
+        }
+        .validation-check-header:hover {
+            background: #252535;
+        }
+        .validation-check.open .validation-check-header {
+            background: #252535;
+        }
+        .validation-badge {
+            display: inline-block;
+            min-width: 42px;
+            text-align: center;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .validation-badge.not-run {
+            background: #333;
+            color: #666;
+        }
+        .validation-badge.pass {
+            background: #1a4a2a;
+            color: #66dd88;
+        }
+        .validation-badge.fail {
+            background: #4a1a1a;
+            color: #dd6666;
+        }
+        .validation-badge.error {
+            background: #4a3a1a;
+            color: #ddaa66;
+        }
+        .validation-check-title {
+            font-weight: 600;
+            color: #ccc;
+            text-transform: capitalize;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+        .validation-check-reasoning {
+            color: #888;
+            font-size: 0.85rem;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .validation-check-docblock {
+            margin-top: 8px;
+            color: #999;
+            font-size: 0.85rem;
+        }
+        .validation-check-duration {
+            color: #666;
+            font-size: 0.8rem;
+            min-width: 60px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .validation-check-chevron {
+            color: #666;
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+            font-family: monospace;
+        }
+        .validation-check-body {
+            padding: 0 12px 12px;
+            border-top: 1px solid #333;
+        }
+        .validation-check-body pre {
+            margin: 8px 0 0;
+            background: #000;
+            padding: 12px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        .validation-check-body code {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+        .validation-check-message {
+            margin-top: 8px;
+            padding: 8px;
+            background: #3a1a1a;
+            color: #dd8888;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+        .validation-check-output {
+            margin-top: 8px;
+            padding: 8px;
+            background: #1a2230;
+            color: #9fc3ff;
+            border-radius: 3px;
+            font-size: 0.82rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .validation-empty {
+            color: #666;
+            padding: 12px;
+        }
+        .validation-group {
+            margin-bottom: 14px;
+        }
+        .validation-group-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            border: 1px solid #2e3646;
+            background: #1a202c;
+            border-radius: 5px;
+            padding: 8px 10px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .validation-group-toggle:hover {
+            background: #212938;
+            border-color: #3b4a66;
+        }
+        .validation-group-chevron {
+            color: #7e90b4;
+            width: 14px;
+            flex-shrink: 0;
+            font-family: monospace;
+        }
+        .validation-group-title {
+            color: #9aa7c0;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .validation-group-desc {
+            color: #66708a;
+            font-weight: 400;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .validation-group-count {
+            color: #7082a3;
+            font-size: 0.78rem;
+            flex-shrink: 0;
+        }
+        .validation-group-body {
+            display: none;
+            margin-top: 8px;
+        }
+        .validation-group.open .validation-group-body {
+            display: block;
+        }
+        .validation-source-shell {
+            position: relative;
+        }
+        .validation-source-shell pre {
+            position: relative;
+            margin-top: 0;
+            background: #000;
+            max-height: 480px;
+            overflow: auto;
+        }
+        .validation-copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            height: 34px;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 999px;
+            background: #262a31;
+            color: #a8b3c7;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .validation-source-shell pre:hover .validation-copy-btn,
+        .validation-copy-btn:focus {
+            opacity: 1;
+        }
+        .validation-copy-btn:hover {
+            background: #313742;
+            color: #d6e7ff;
+        }
+        .validation-copy-btn.success {
+            background: #1f6f44;
+            color: #d7ffe8;
+        }
+        .validation-source-shell pre code.hljs,
+        .validation-check-body pre code.hljs,
+        .framework-markdown pre code.hljs {
+            background: #000;
+        }
+        .validation-copy-label {
+            white-space: nowrap;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github-dark.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+    {% if ssr_content_html %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": {{ ssr_title|tojson }},
+        "description": {{ ssr_description|tojson }},
+        "url": "{% if viewing_version %}/v{{ viewing_version }}{% endif %}/framework/{{ initial_item_id }}/",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Field Dynamics",
+            "url": "/"
+        }
+    }
+    </script>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="screen-container">
+    <div class="screen active framework-screen">
+        <div class="analysis-body framework-body">
+            <aside class="left-panel framework-left-panel" id="left-panel">
+                <div class="framework-sidebar-header">
+                    <h2 class="framework-sidebar-title">Gravity Field Dynamics</h2>
+                </div>
+
+                <nav class="framework-essentials" aria-label="Gravity Field Dynamics essentials">
+                    <div class="framework-nav-accordion">
+                        <section class="framework-nav-accordion-item open" data-accordion-id="essentials">
+                            <button class="framework-nav-accordion-toggle" type="button" aria-expanded="true" aria-controls="framework-accordion-panel-essentials">
+                                <span class="framework-nav-accordion-title">CORE</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">−</span>
+                            </button>
+                            <div class="framework-nav-accordion-panel" id="framework-accordion-panel-essentials">
+                                <div class="framework-nav-group" data-group-id="foundations">
+                                    <h3 class="framework-nav-heading">Foundations</h3>
+                                    <a class="framework-nav-link" href="#">The Gravity Field</a>
+                                    <a class="framework-nav-link" href="#">Field Closure Principle</a>
+                                    <a class="framework-nav-link" href="#">Why k = 4 and d = 3</a>
+                                    <a class="framework-nav-link" href="#">Dual Tetrahedron and Field Origin</a>
+                                    <a class="framework-nav-link" href="#">Propagation Requires Neighbors</a>
+                                    <a class="framework-nav-link" href="#">Field Closure in GR</a>
+                                    <a class="framework-nav-link" href="#">The Characteristic Scale</a>
+                                    <a class="framework-nav-link" href="#">Face Structure and Spin</a>
+                                    <a class="framework-nav-link" href="#">The 28 Geometric Elements</a>
+                                    <a class="framework-nav-link" href="#">The Stellated Octahedron</a>
+                                </div>
+
+                                <div class="framework-nav-group" data-group-id="fundamental_constants">
+                                    <h3 class="framework-nav-heading">Fundamental Constants</h3>
+                                    <a class="framework-nav-link" href="#">Fine Structure Constant &alpha;</a>
+                                    <a class="framework-nav-link" href="#">Electron Mass</a>
+                                    <a class="framework-nav-link" href="#">Mass-Energy Equivalence</a>
+                                    <a class="framework-nav-link" href="#">H0 Prediction</a>
+                                    <a class="framework-nav-link" href="#">Capstone Constants Suite</a>
+                                </div>
+
+                                <div class="framework-nav-group" data-group-id="gravitation">
+                                    <h3 class="framework-nav-heading">Gravitation</h3>
+                                    <a class="framework-nav-link" href="#">Coupling Polynomial and Structural States</a>
+                                    <a class="framework-nav-link" href="#">G from Topology</a>
+                                    <a class="framework-nav-link" href="#">Constitutive Law &mu;(x)</a>
+                                    <a class="framework-nav-link" href="#">Poisson Equation and Scale Invariance</a>
+                                    <a class="framework-nav-link" href="#">Covariant Completion</a>
+                                    <a class="framework-nav-link" href="#">Bimetric Locking</a>
+                                    <a class="framework-nav-link" href="#">Weak and Strong Field Limits</a>
+                                    <a class="framework-nav-link" href="#">Lensing and Time Delay</a>
+                                    <a class="framework-nav-link" href="#">Thermodynamic Relations</a>
+                                    <a class="framework-nav-link" href="#">Action Prefactor Dictionary</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="framework-nav-accordion-item" data-accordion-id="applications" hidden>
+                            <button class="framework-nav-accordion-toggle" type="button" aria-expanded="false" aria-controls="framework-accordion-panel-applications">
+                                <span class="framework-nav-accordion-title">APPLICATIONS</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">+</span>
+                            </button>
+                            <div class="framework-nav-accordion-panel" id="framework-accordion-panel-applications" hidden>
+                                <div class="framework-nav-group" data-group-id="matter_nuclear_physics">
+                                    <h3 class="framework-nav-heading">Matter and Nuclear Physics</h3>
+                                    <a class="framework-nav-link" href="#">Nuclear Synthesis Bridge</a>
+                                    <a class="framework-nav-link" href="#">Magic Numbers and Shells</a>
+                                    <a class="framework-nav-link" href="#">Binding Energy Envelope</a>
+                                    <a class="framework-nav-link" href="#">Heavy End Honest Failure</a>
+                                    <a class="framework-nav-link" href="#">Resonance Modes</a>
+                                    <a class="framework-nav-link" href="#">Stability Ceiling</a>
+                                </div>
+
+                                <div class="framework-nav-group" data-group-id="gauge_particle_physics">
+                                    <h3 class="framework-nav-heading">Gauge and Particle Physics</h3>
+                                    <a class="framework-nav-link" href="#">Electromagnetic Sector</a>
+                                    <a class="framework-nav-link" href="#">Strong Sector Structure</a>
+                                    <a class="framework-nav-link" href="#">Weak Sector and Parity</a>
+                                    <a class="framework-nav-link" href="#">Particle Inventory</a>
+                                    <a class="framework-nav-link" href="#">Generation Logic</a>
+                                    <a class="framework-nav-link" href="#">Mass Hierarchy</a>
+                                </div>
+
+                                <div class="framework-nav-group" data-group-id="quantum_theory">
+                                    <h3 class="framework-nav-heading">Quantum Theory</h3>
+                                    <a class="framework-nav-link" href="#">Born Rule Origin</a>
+                                    <a class="framework-nav-link" href="#">Measurement Mechanism</a>
+                                    <a class="framework-nav-link" href="#">Entanglement Structure</a>
+                                    <a class="framework-nav-link" href="#">Decoherence Timescale</a>
+                                </div>
+
+                                <div class="framework-nav-group" data-group-id="cosmology">
+                                    <h3 class="framework-nav-heading">Cosmology</h3>
+                                    <a class="framework-nav-link" href="#">Expansion History</a>
+                                    <a class="framework-nav-link" href="#">Dark Sector Alternative</a>
+                                    <a class="framework-nav-link" href="#">Nucleosynthesis Tensions</a>
+                                    <a class="framework-nav-link" href="#">CMB Constraints</a>
+                                    <a class="framework-nav-link" href="#">Structure Growth</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="framework-nav-accordion-item" data-accordion-id="engine" hidden>
+                            <button class="framework-nav-accordion-toggle" type="button" aria-expanded="false" aria-controls="framework-accordion-panel-engine">
+                                <span class="framework-nav-accordion-title">ENGINE</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">+</span>
+                            </button>
+                            <div class="framework-nav-accordion-panel" id="framework-accordion-panel-engine" hidden>
+                                <div class="framework-nav-group" data-group-id="engine">
+                                    <a class="framework-nav-link" href="#">Field Closure Engine</a>
+                                    <a class="framework-nav-link" href="#">Field Probing</a>
+                                    <a class="framework-nav-link" href="#">Engine Dynamics</a>
+                                    <a class="framework-nav-link" href="#">Engine Crosschecks</a>
+                                    <a class="framework-nav-link" href="#">Stress Tests</a>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </nav>
+            </aside>
+
+            <div class="resize-handle" id="resize-handle"></div>
+
+            <main class="right-panel framework-right-panel">
+                {% if viewing_version %}
+                <div class="framework-version-banner" style="background: #2a2a3a; color: #a0a0c0; padding: 8px 16px; font-size: 0.85rem; border-bottom: 1px solid #3a3a4a; display: flex; align-items: center; gap: 8px;">
+                    <span>Viewing archived version {{ viewing_version }}</span>
+                    <a href="/framework/{% if initial_item_id %}{{ initial_item_id }}/{% endif %}" style="color: #6ca0dc; text-decoration: none;">View latest version</a>
+                </div>
+                {% endif %}
+                <section class="framework-content-card">
+                    <h1 class="framework-title">{% if ssr_title %}{{ ssr_title }}{% else %}Field Dynamics Framework{% endif %}</h1>
+                    <p class="framework-subtitle">
+                        {% if ssr_group_id %}Loaded from framework/groups/{{ ssr_group_id }}/items/{{ initial_item_id }}/{% else %}Documentation style workspace with tabs and a content guide.{% endif %}
+                    </p>
+
+                    <div class="framework-main-tabs" role="tablist" aria-label="Framework content tabs">
+                        <button class="framework-main-tab active" data-tab-id="overview" role="tab" aria-selected="true">Overview</button>
+                        <button class="framework-main-tab" data-tab-id="examples" role="tab" aria-selected="false">Examples</button>
+                        <button class="framework-main-tab" data-tab-id="validation" role="tab" aria-selected="false">Validation</button>
+                    </div>
+
+                    <div class="framework-main-layout">
+                        <div class="framework-main-content">
+                            <article class="framework-tab-panel active" data-tab-content="overview">
+                                <div id="framework-overview-content" class="framework-markdown"{% if ssr_content_html %} data-ssr="true"{% endif %}>{% if ssr_content_html %}{{ ssr_content_html|safe }}{% else %}Loading overview...{% endif %}</div>
+                            </article>
+
+                            <article class="framework-tab-panel" data-tab-content="examples" style="display: none;">
+                                <div id="framework-examples-content" class="framework-markdown">Select an item to load examples.</div>
+                            </article>
+
+                            <article class="framework-tab-panel" data-tab-content="validation" style="display: none;">
+                                <div class="validation-toolbar" id="validation-toolbar" style="display:none;">
+                                    <button class="validation-run-btn" id="validation-run-btn">Run All</button>
+                                    <span class="validation-summary" id="validation-summary"></span>
+                                    <div class="validation-view-toggle">
+                                        <button class="validation-view-btn active" data-view="checks">Verification</button>
+                                        <button class="validation-view-btn" data-view="source">Implementation</button>
+                                    </div>
+                                </div>
+                                <div id="validation-checks-view" class="validation-view">
+                                    <div id="validation-accordion" class="validation-accordion"></div>
+                                </div>
+                                <div id="validation-source-view" class="validation-view" style="display:none;">
+                                    <div class="validation-source-shell">
+                                        <div id="framework-validation-content" class="framework-markdown">Select an item to load validation details.</div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <aside class="framework-toc" aria-label="Content guide">
+                            <h3 class="framework-toc-title" id="framework-toc-title">Overview Content</h3>
+                            <div id="framework-toc-links"></div>
+                        </aside>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var leftPanel = document.getElementById('left-panel');
+        var resizeHandle = document.getElementById('resize-handle');
+        var isResizing = false;
+
+        if (leftPanel && resizeHandle) {
+            resizeHandle.addEventListener('mousedown', function () {
+                isResizing = true;
+                resizeHandle.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+            });
+
+            document.addEventListener('mousemove', function (event) {
+                if (!isResizing) return;
+                var minWidth = 300;
+                var maxWidth = 800;
+                var newWidth = event.clientX;
+                if (newWidth >= minWidth && newWidth <= maxWidth) {
+                    leftPanel.style.width = newWidth + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', function () {
+                if (!isResizing) return;
+                isResizing = false;
+                resizeHandle.classList.remove('dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            });
+        }
+
+        var viewingVersion = {{ viewing_version|tojson }};
+        var versionPrefix = viewingVersion ? '/v' + viewingVersion : '';
+        var hiddenNavItemIds = {{ hidden_nav_item_ids|tojson if hidden_nav_item_ids is defined else "[]" }};
+
+        var navItemIds = {
+            foundations: [
+                'the_gravity_field',
+                'field_closure_principle',
+                'why_k4_d3',
+                'dual_tetrahedron_field_origin',
+                'propagation_requires_neighbors',
+                'field_closure_in_gr',
+                'characteristic_scale',
+                'face_structure_and_spin',
+                'twenty_eight_geometric_elements',
+                'stellated_octahedron'
+            ],
+            gravitation: [
+                'coupling_polynomial_structural_states',
+                'g_from_topology',
+                'constitutive_law_mu_x',
+                'poisson_scale_invariance',
+                'covariant_completion',
+                'bimetric_locking',
+                'weak_strong_field_limits',
+                'lensing_time_delay',
+                'thermodynamic_relations',
+                'action_prefactor_dictionary'
+            ],
+            fundamental_constants: [
+                'fine_structure_constant_alpha',
+                'electron_mass',
+                'inverse_square_emc2_force_hierarchy',
+                'h0_prediction',
+                'capstone_constants_suite'
+            ],
+            matter_nuclear_physics: [
+                'nuclear_synthesis_bridge',
+                'magic_numbers_shells',
+                'binding_energy_envelope',
+                'heavy_end_honest_failure',
+                'resonance_modes',
+                'stability_ceiling'
+            ],
+            gauge_particle_physics: [
+                'electromagnetic_sector',
+                'strong_sector_structure',
+                'weak_sector_parity',
+                'particle_inventory',
+                'generation_logic',
+                'mass_hierarchy'
+            ],
+            quantum_theory: [
+                'born_rule_origin',
+                'measurement_mechanism',
+                'entanglement_structure',
+                'decoherence_timescale'
+            ],
+            cosmology: [
+                'expansion_history',
+                'dark_sector_alternative',
+                'nucleosynthesis_tensions',
+                'cmb_constraints',
+                'structure_growth'
+            ]
+        };
+
+        document.querySelectorAll('.framework-nav-group[data-group-id]').forEach(function (groupEl) {
+            var groupId = groupEl.getAttribute('data-group-id');
+            var ids = navItemIds[groupId] || [];
+            var links = groupEl.querySelectorAll('.framework-nav-link');
+            links.forEach(function (link, idx) {
+                if (idx < ids.length) {
+                    link.setAttribute('data-item-id', ids[idx]);
+                    link.setAttribute('href', versionPrefix + '/framework/' + ids[idx] + '/');
+                    var isHidden = hiddenNavItemIds.indexOf(ids[idx]) !== -1;
+                    link.classList.toggle('is-nav-hidden', isHidden);
+                    link.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
+                }
+                link.setAttribute('data-group-id', groupId);
+            });
+        });
+
+        var groupToAccordionId = {
+            foundations: 'essentials',
+            fundamental_constants: 'essentials',
+            gravitation: 'essentials',
+            matter_nuclear_physics: 'applications',
+            gauge_particle_physics: 'applications',
+            quantum_theory: 'applications',
+            cosmology: 'applications',
+            engine: 'engine'
+        };
+        var accordionItems = document.querySelectorAll('.framework-nav-accordion-item[data-accordion-id]');
+        var currentOpenAccordionId = null;
+
+        function setNavAccordionOpen(accordionId) {
+            currentOpenAccordionId = accordionId || null;
+            accordionItems.forEach(function (item) {
+                var isOpen = item.getAttribute('data-accordion-id') === accordionId;
+                item.classList.toggle('open', isOpen);
+
+                var btn = item.querySelector('.framework-nav-accordion-toggle');
+                var panel = item.querySelector('.framework-nav-accordion-panel');
+                var chevron = item.querySelector('.framework-nav-accordion-chevron');
+
+                if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                if (panel) panel.hidden = !isOpen;
+                if (chevron) chevron.textContent = isOpen ? '−' : '+';
+            });
+        }
+
+        function openAccordionForGroup(groupId) {
+            var accordionId = groupToAccordionId[groupId];
+            if (!accordionId) return;
+            setNavAccordionOpen(accordionId);
+        }
+
+        document.querySelectorAll('.framework-nav-accordion-toggle').forEach(function (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                var item = toggleBtn.closest('.framework-nav-accordion-item');
+                if (!item) return;
+                var accordionId = item.getAttribute('data-accordion-id');
+                if (!accordionId) return;
+                if (currentOpenAccordionId === accordionId) {
+                    setNavAccordionOpen(null);
+                    return;
+                }
+                setNavAccordionOpen(accordionId);
+            });
+        });
+
+        setNavAccordionOpen('essentials');
+
+        var tabButtons = document.querySelectorAll('.framework-main-tab');
+        var tabPanels = document.querySelectorAll('.framework-tab-panel');
+        var panelScroller = document.querySelector('.framework-right-panel');
+        var tocTitle = document.getElementById('framework-toc-title');
+        var tocLinks = document.getElementById('framework-toc-links');
+        var headingTitle = document.querySelector('.framework-title');
+        var headingSubtitle = document.querySelector('.framework-subtitle');
+
+        var contentByTab = {
+            overview: document.getElementById('framework-overview-content'),
+            examples: document.getElementById('framework-examples-content'),
+            validation: document.getElementById('framework-validation-content')
+        };
+        var initialItemId = {{ initial_item_id|tojson }};
+        var activeTabId = 'overview';
+        var selectedGroupId = null;
+        var selectedItemId = null;
+        var selectedItemTitle = null;
+        var tocUpdateRaf = null;
+        var mathRetryTimer = null;
+        var tabVisibility = {
+            overview: true,
+            examples: false,
+            validation: true
+        };
+
+        function renderMarkdown(targetEl, markdownText) {
+            if (!targetEl) return;
+            if (window.marked && typeof window.marked.parse === 'function') {
+                targetEl.innerHTML = window.marked.parse(markdownText);
+            } else {
+                targetEl.textContent = markdownText;
+            }
+
+            runKatexOn(targetEl);
+            scheduleMathRefresh();
+        }
+
+        function buildDocUrl(groupId, itemId, docKind) {
+            return '/api' + versionPrefix + '/framework/item/' +
+                encodeURIComponent(groupId) + '/' +
+                encodeURIComponent(itemId) + '/' +
+                encodeURIComponent(docKind);
+        }
+
+        function buildMetaUrl(groupId, itemId) {
+            return '/api' + versionPrefix + '/framework/item-meta/' +
+                encodeURIComponent(groupId) + '/' +
+                encodeURIComponent(itemId);
+        }
+
+        async function fetchDoc(groupId, itemId, docKind) {
+            var resp = await fetch(buildDocUrl(groupId, itemId, docKind));
+            if (!resp.ok) {
+                throw new Error('Failed to load ' + docKind);
+            }
+            return await resp.text();
+        }
+
+        async function fetchItemMeta(groupId, itemId) {
+            var resp = await fetch(buildMetaUrl(groupId, itemId));
+            if (!resp.ok) {
+                throw new Error('Failed to load item metadata');
+            }
+            return await resp.json();
+        }
+
+        function applyTabVisibility(visibility) {
+            tabVisibility = {
+                overview: true,
+                examples: !(visibility && visibility.examples === false),
+                validation: !(visibility && visibility.validation === false)
+            };
+
+            tabButtons.forEach(function (btn) {
+                var tabId = btn.getAttribute('data-tab-id');
+                var isVisible = tabVisibility[tabId] !== false;
+                btn.style.display = isVisible ? '' : 'none';
+            });
+
+            tabPanels.forEach(function (panel) {
+                var tabId = panel.getAttribute('data-tab-content');
+                if (tabVisibility[tabId] === false) {
+                    panel.style.display = 'none';
+                    panel.classList.remove('active');
+                }
+            });
+
+            if (tabVisibility[activeTabId] === false) {
+                activeTabId = 'overview';
+            }
+        }
+
+        function buildTocForActiveTab() {
+            if (!tocLinks || !tocTitle) return;
+            var activePanel = document.querySelector('.framework-tab-panel[data-tab-content="' + activeTabId + '"]');
+            tocTitle.textContent = (activeTabId.charAt(0).toUpperCase() + activeTabId.slice(1)) + ' Content';
+            tocLinks.innerHTML = '';
+            if (!activePanel) return;
+
+            var contentRoot = activePanel.querySelector('.framework-markdown');
+            if (!contentRoot) return;
+
+            var headings = contentRoot.querySelectorAll('h1, h2, h3');
+            if (headings.length === 0) {
+                var empty = document.createElement('div');
+                empty.className = 'framework-toc-link';
+                empty.textContent = 'No sections available';
+                tocLinks.appendChild(empty);
+                return;
+            }
+
+            headings.forEach(function (heading, idx) {
+                if (!heading.id) {
+                    heading.id = activeTabId + '-section-' + idx;
+                }
+                var link = document.createElement('a');
+                link.className = 'framework-toc-link';
+                link.href = '#' + heading.id;
+                link.setAttribute('data-target-id', heading.id);
+                link.textContent = heading.textContent || ('Section ' + (idx + 1));
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setActiveTocLink(heading.id);
+                    window.setTimeout(scheduleTocUpdate, 180);
+                });
+                tocLinks.appendChild(link);
+            });
+            scheduleTocUpdate();
+        }
+
+        function setActiveTocLink(targetId) {
+            if (!tocLinks) return;
+            tocLinks.querySelectorAll('.framework-toc-link[data-target-id]').forEach(function (link) {
+                var isActive = link.getAttribute('data-target-id') === targetId;
+                link.classList.toggle('active', isActive);
+            });
+        }
+
+        function updateActiveTocLink() {
+            if (!tocLinks) return;
+            var activePanel = document.querySelector('.framework-tab-panel[data-tab-content="' + activeTabId + '"]');
+            if (!activePanel || activePanel.style.display === 'none') return;
+            var contentRoot = activePanel.querySelector('.framework-markdown');
+            if (!contentRoot) return;
+            var headings = Array.from(contentRoot.querySelectorAll('h1, h2, h3'));
+            if (headings.length === 0) return;
+
+            var scrollerTop = panelScroller
+                ? panelScroller.getBoundingClientRect().top
+                : 0;
+            var threshold = scrollerTop + 120;
+            var currentHeading = headings[0];
+
+            headings.forEach(function (heading) {
+                if (heading.getBoundingClientRect().top <= threshold) {
+                    currentHeading = heading;
+                }
+            });
+
+            if (currentHeading && currentHeading.id) {
+                setActiveTocLink(currentHeading.id);
+            }
+        }
+
+        function scheduleTocUpdate() {
+            if (tocUpdateRaf !== null) return;
+            tocUpdateRaf = window.requestAnimationFrame(function () {
+                tocUpdateRaf = null;
+                updateActiveTocLink();
+            });
+        }
+
+        function setActiveTab(tabId) {
+            if (tabVisibility[tabId] === false) {
+                tabId = 'overview';
+            }
+            activeTabId = tabId;
+            tabButtons.forEach(function (btn) {
+                var active = btn.getAttribute('data-tab-id') === tabId;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+
+            tabPanels.forEach(function (panel) {
+                var active = panel.getAttribute('data-tab-content') === tabId;
+                panel.classList.toggle('active', active);
+                panel.style.display = active ? '' : 'none';
+            });
+            buildTocForActiveTab();
+            scheduleMathRefresh();
+
+            if (panelScroller) {
+                panelScroller.scrollTo({ top: 0, behavior: 'auto' });
+            }
+        }
+
+        tabButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var tabId = btn.getAttribute('data-tab-id');
+                if (tabVisibility[tabId] === false) return;
+                setActiveTab(tabId);
+            });
+        });
+
+        if (panelScroller) {
+            panelScroller.addEventListener('scroll', scheduleTocUpdate, { passive: true });
+        }
+        window.addEventListener('resize', scheduleTocUpdate);
+        window.addEventListener('focus', scheduleMathRefresh);
+        window.addEventListener('pageshow', scheduleMathRefresh);
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) scheduleMathRefresh();
+        });
+
+        function runKatexOn(el) {
+            if (typeof window.renderMathInElement === 'function') {
+                window.renderMathInElement(el, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false },
+                        { left: '\\(', right: '\\)', display: false },
+                        { left: '\\[', right: '\\]', display: true }
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function renderMathForVisiblePanels() {
+            Object.keys(contentByTab).forEach(function (tabId) {
+                if (tabVisibility[tabId] === false) return;
+                var root = contentByTab[tabId];
+                if (!root) return;
+                runKatexOn(root);
+            });
+        }
+
+        function scheduleMathRefresh() {
+            renderMathForVisiblePanels();
+            if (typeof window.renderMathInElement === 'function') return;
+            if (mathRetryTimer !== null) return;
+            mathRetryTimer = window.setTimeout(function () {
+                mathRetryTimer = null;
+                renderMathForVisiblePanels();
+            }, 1200);
+        }
+
+        // ---- Validation accordion ----
+
+        var validationToolbar = document.getElementById('validation-toolbar');
+        var validationAccordion = document.getElementById('validation-accordion');
+        var validationSummary = document.getElementById('validation-summary');
+        var validationRunBtn = document.getElementById('validation-run-btn');
+        var validationChecksView = document.getElementById('validation-checks-view');
+        var validationSourceView = document.getElementById('validation-source-view');
+        var validationViewBtns = document.querySelectorAll('.validation-view-btn');
+        var validationSourceMarkdownRaw = '';
+
+        function buildChecksUrl(groupId, itemId) {
+            return '/api' + versionPrefix + '/framework/item/' +
+                encodeURIComponent(groupId) + '/' +
+                encodeURIComponent(itemId) + '/checks';
+        }
+
+        function buildChecksRunUrl(groupId, itemId) {
+            return '/api' + versionPrefix + '/framework/item/' +
+                encodeURIComponent(groupId) + '/' +
+                encodeURIComponent(itemId) + '/checks/run';
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function humanizeCheckName(name) {
+            return name.replace(/^check_/, '').replace(/_/g, ' ');
+        }
+
+        function highlightCodeBlocks(rootEl) {
+            if (!rootEl) return;
+            if (typeof window.hljs !== 'object') return;
+            rootEl.querySelectorAll('pre code').forEach(function (codeEl) {
+                var hasLanguageClass = Array.from(codeEl.classList).some(function (cls) {
+                    return cls.indexOf('language-') === 0;
+                });
+                if (!hasLanguageClass) {
+                    codeEl.classList.add('language-python');
+                }
+                try {
+                    var highlighted = window.hljs.highlight(codeEl.textContent, {
+                        language: 'python',
+                        ignoreIllegals: true
+                    }).value;
+                    codeEl.innerHTML = highlighted;
+                    codeEl.classList.add('hljs', 'language-python');
+                } catch (err) {
+                    window.hljs.highlightElement(codeEl);
+                }
+            });
+        }
+
+        function ensureValidationCopyButtons() {
+            if (!validationSourceView) return;
+            var sourceRoot = document.getElementById('framework-validation-content');
+            if (!sourceRoot) return;
+            var pres = sourceRoot.querySelectorAll('pre');
+            pres.forEach(function (pre) {
+                var existing = pre.querySelector('.validation-copy-btn');
+                if (existing) return;
+                var btn = document.createElement('button');
+                btn.className = 'validation-copy-btn';
+                btn.type = 'button';
+                btn.title = 'Copy source';
+                btn.setAttribute('aria-label', 'Copy source');
+                btn.innerHTML =
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+                    '<rect x="9" y="9" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/>' +
+                    '<path d="M15 9V7C15 5.89543 14.1046 5 13 5H7C5.89543 5 5 5.89543 5 7V13C5 14.1046 5.89543 15 7 15H9" stroke="currentColor" stroke-width="1.8"/>' +
+                    '</svg>' +
+                    '<span class="validation-copy-label">Copy code</span>';
+                pre.appendChild(btn);
+                btn.addEventListener('click', function () {
+                    var codeEl = pre.querySelector('code');
+                    var textToCopy = codeEl ? codeEl.textContent : pre.textContent;
+                    if (!textToCopy) return;
+                    navigator.clipboard.writeText(textToCopy).then(function () {
+                        btn.classList.add('success');
+                        window.setTimeout(function () {
+                            btn.classList.remove('success');
+                        }, 1200);
+                    });
+                });
+            });
+        }
+
+        function renderAccordion(groups) {
+            if (!validationAccordion) return;
+            if (!groups || groups.length === 0) {
+                validationAccordion.innerHTML = '<p class="validation-empty">No validation files found for this item.</p>';
+                if (validationToolbar) validationToolbar.style.display = 'flex';
+                if (validationSummary) validationSummary.textContent = '0 checks';
+                if (validationRunBtn) validationRunBtn.disabled = true;
+                return;
+            }
+
+            if (validationToolbar) validationToolbar.style.display = 'flex';
+            var totalChecks = 0;
+            var openByDefault = groups.length === 1;
+            var html = '';
+            groups.forEach(function (group) {
+                var groupPath = group.path || 'validation';
+                var description = group.description || '';
+                var checks = group.checks || [];
+                totalChecks += checks.length;
+                var openClass = openByDefault ? ' open' : '';
+                html += '<div class="validation-group' + openClass + '" data-validation-file="' + escapeHtml(groupPath) + '">'
+                    + '<button type="button" class="validation-group-toggle" aria-expanded="' + (openByDefault ? 'true' : 'false') + '">'
+                    + '<span class="validation-group-chevron">' + (openByDefault ? '-' : '+') + '</span>'
+                    + '<span class="validation-group-title">' + escapeHtml(groupPath) + '</span>';
+                if (description) {
+                    html += '<span class="validation-group-desc">' + escapeHtml(description) + '</span>';
+                }
+                html += '<span class="validation-group-count">' + checks.length + ' checks</span>'
+                    + '</button>'
+                    + '<div class="validation-group-body"><div class="validation-accordion-group">';
+                if (checks.length === 0) {
+                    html += '<p class="validation-empty">No check_ functions found in this file.</p>';
+                } else {
+                    for (var i = 0; i < checks.length; i++) {
+                        var c = checks[i];
+                        var reasoningText = c.reasoning || c.doc || '';
+                        var docBlock = c.doc
+                            ? '<div class="validation-check-docblock">' + escapeHtml(c.doc) + '</div>'
+                            : '';
+                        html += '<div class="validation-check" data-check-name="' + escapeHtml(c.name)
+                            + '" data-check-file="' + escapeHtml(groupPath) + '">'
+                            + '<div class="validation-check-header">'
+                            + '<span class="validation-badge not-run">--</span>'
+                            + '<span class="validation-check-title">' + escapeHtml(humanizeCheckName(c.name)) + '</span>'
+                            + '<span class="validation-check-reasoning">' + escapeHtml(reasoningText) + '</span>'
+                            + '<span class="validation-check-duration"></span>'
+                            + '<span class="validation-check-chevron">+</span>'
+                            + '</div>'
+                            + '<div class="validation-check-body" style="display:none;">'
+                            + docBlock
+                            + '<pre><code class="language-python">' + escapeHtml(c.source) + '</code></pre>'
+                            + '</div>'
+                            + '</div>';
+                    }
+                }
+                html += '</div></div></div>';
+            });
+            validationAccordion.innerHTML = html;
+            highlightCodeBlocks(validationAccordion);
+
+            validationAccordion.querySelectorAll('.validation-group-toggle').forEach(function (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    var groupEl = toggleBtn.closest('.validation-group');
+                    if (!groupEl) return;
+                    var isOpen = groupEl.classList.toggle('open');
+                    toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    var chev = toggleBtn.querySelector('.validation-group-chevron');
+                    if (chev) chev.textContent = isOpen ? '-' : '+';
+                });
+            });
+
+            validationAccordion.querySelectorAll('.validation-accordion-group').forEach(function (groupEl) {
+                groupEl.querySelectorAll('.validation-check-header').forEach(function (header) {
+                    header.addEventListener('click', function () {
+                        var currentCheck = header.parentElement;
+                        var body = header.nextElementSibling;
+                        var chevron = header.querySelector('.validation-check-chevron');
+                        var shouldOpen = body.style.display === 'none';
+
+                        groupEl.querySelectorAll('.validation-check').forEach(function (checkEl) {
+                            if (checkEl === currentCheck) return;
+                            checkEl.classList.remove('open');
+                            var otherBody = checkEl.querySelector('.validation-check-body');
+                            var otherChevron = checkEl.querySelector('.validation-check-chevron');
+                            if (otherBody) otherBody.style.display = 'none';
+                            if (otherChevron) otherChevron.textContent = '+';
+                        });
+
+                        if (shouldOpen) {
+                            body.style.display = 'block';
+                            chevron.textContent = '-';
+                            currentCheck.classList.add('open');
+                        } else {
+                            body.style.display = 'none';
+                            chevron.textContent = '+';
+                            currentCheck.classList.remove('open');
+                        }
+                    });
+                });
+            });
+
+            if (validationSummary) validationSummary.textContent = totalChecks + ' checks';
+            if (validationRunBtn) validationRunBtn.disabled = totalChecks === 0;
+        }
+
+        function updateAccordionResults(data) {
+            var groups = data.groups || [];
+            var total = data.total;
+            var passed = data.passed;
+            var failed = data.failed;
+            var errors = data.errors;
+            if (typeof total !== 'number') {
+                total = 0;
+                passed = 0;
+                failed = 0;
+                errors = 0;
+                groups.forEach(function (group) {
+                    var checks = group.checks || [];
+                    total += checks.length;
+                    checks.forEach(function (c) {
+                        if (c.status === 'PASS') passed += 1;
+                        else if (c.status === 'FAIL') failed += 1;
+                        else if (c.status === 'ERROR') errors += 1;
+                    });
+                });
+            }
+            if (validationSummary) {
+                var text = total + ' checks: ' + passed + ' passed';
+                if (failed > 0) text += ', ' + failed + ' failed';
+                if (errors > 0) text += ', ' + errors + ' errors';
+                validationSummary.textContent = text;
+            }
+
+            groups.forEach(function (group) {
+                var groupPath = group.path || 'validation';
+                var checks = group.checks || [];
+                for (var i = 0; i < checks.length; i++) {
+                    var c = checks[i];
+                    var el = validationAccordion
+                        ? validationAccordion.querySelector(
+                            '.validation-check[data-check-file="' + groupPath +
+                            '"][data-check-name="' + c.name + '"]'
+                        )
+                        : null;
+                    if (!el) continue;
+
+                    var badge = el.querySelector('.validation-badge');
+                    badge.textContent = c.status;
+                    badge.className = 'validation-badge ' + c.status.toLowerCase();
+
+                    var durationEl = el.querySelector('.validation-check-duration');
+                    if (durationEl) durationEl.textContent = c.duration_ms + 'ms';
+
+                    if (c.status !== 'PASS') {
+                        var parentGroup = el.closest('.validation-group');
+                        if (parentGroup && !parentGroup.classList.contains('open')) {
+                            parentGroup.classList.add('open');
+                            var parentToggle = parentGroup.querySelector('.validation-group-toggle');
+                            if (parentToggle) parentToggle.setAttribute('aria-expanded', 'true');
+                            var groupChevron = parentGroup.querySelector('.validation-group-chevron');
+                            if (groupChevron) groupChevron.textContent = '-';
+                        }
+                        var body = el.querySelector('.validation-check-body');
+                        body.style.display = 'block';
+                        var chevron = el.querySelector('.validation-check-chevron');
+                        chevron.textContent = '-';
+                    }
+
+                    var body = el.querySelector('.validation-check-body');
+                    if (!body) continue;
+                    var existingOutput = body.querySelector('.validation-check-output');
+                    if (existingOutput) existingOutput.remove();
+                    var existingMessage = body.querySelector('.validation-check-message');
+                    if (existingMessage) existingMessage.remove();
+
+                    if (c.output) {
+                        var outEl = document.createElement('div');
+                        outEl.className = 'validation-check-output';
+                        outEl.textContent = c.output;
+                        body.appendChild(outEl);
+                    }
+
+                    if (c.message) {
+                        var msgEl = document.createElement('div');
+                        msgEl.className = 'validation-check-message';
+                        msgEl.textContent = c.message;
+                        body.appendChild(msgEl);
+                        body.style.display = 'block';
+                        var msgChevron = el.querySelector('.validation-check-chevron');
+                        if (msgChevron) msgChevron.textContent = '-';
+                    }
+                }
+            });
+        }
+
+        validationViewBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var view = btn.getAttribute('data-view');
+                validationViewBtns.forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                if (view === 'checks') {
+                    if (validationChecksView) validationChecksView.style.display = '';
+                    if (validationSourceView) validationSourceView.style.display = 'none';
+                    if (validationRunBtn) validationRunBtn.style.display = '';
+                    if (validationSummary) validationSummary.style.display = '';
+                } else {
+                    if (validationChecksView) validationChecksView.style.display = 'none';
+                    if (validationSourceView) validationSourceView.style.display = '';
+                    if (validationRunBtn) validationRunBtn.style.display = 'none';
+                    if (validationSummary) validationSummary.style.display = 'none';
+                    ensureValidationCopyButtons();
+                    highlightCodeBlocks(validationSourceView);
+                }
+            });
+        });
+
+        if (validationRunBtn) {
+            validationRunBtn.addEventListener('click', function () {
+                if (!selectedGroupId || !selectedItemId) return;
+                validationRunBtn.disabled = true;
+                validationRunBtn.textContent = 'Running...';
+
+                fetch(buildChecksRunUrl(selectedGroupId, selectedItemId), { method: 'POST' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        updateAccordionResults(data);
+                    })
+                    .catch(function (err) {
+                        if (validationSummary) validationSummary.textContent = 'Error: ' + err.message;
+                    })
+                    .then(function () {
+                        validationRunBtn.disabled = false;
+                        validationRunBtn.textContent = 'Run All';
+                    });
+            });
+        }
+
+
+        // ---- End validation accordion ----
+
+        async function loadItem(groupId, itemId, itemTitle, options) {
+            options = options || {};
+            selectedGroupId = groupId;
+            selectedItemId = itemId;
+            selectedItemTitle = itemTitle;
+
+            if (headingTitle) {
+                headingTitle.textContent = itemTitle;
+            }
+            if (headingSubtitle) {
+                headingSubtitle.textContent = 'Loaded from framework/' + 'groups/' + groupId + '/items/' + itemId + '/';
+            }
+
+            var itemMeta = null;
+            try {
+                itemMeta = await fetchItemMeta(groupId, itemId);
+            } catch (metaErr) {
+                itemMeta = { tabs: { overview: true, examples: false, validation: true } };
+            }
+            applyTabVisibility(itemMeta.tabs || {});
+
+            var hasSSR = contentByTab.overview &&
+                         contentByTab.overview.getAttribute('data-ssr') === 'true';
+
+            if (!hasSSR) {
+                renderMarkdown(contentByTab.overview, 'Loading overview...');
+            }
+            if (tabVisibility.examples) {
+                renderMarkdown(contentByTab.examples, 'Loading examples...');
+            } else if (contentByTab.examples) {
+                contentByTab.examples.innerHTML = '';
+            }
+            if (tabVisibility.validation) {
+                if (validationAccordion) validationAccordion.innerHTML = '<p class="validation-empty">Loading checks...</p>';
+                if (validationSummary) validationSummary.textContent = '';
+                if (validationToolbar) validationToolbar.style.display = 'none';
+                if (validationChecksView) validationChecksView.style.display = '';
+                if (validationSourceView) validationSourceView.style.display = 'none';
+                if (validationRunBtn) validationRunBtn.style.display = '';
+                if (validationSummary) validationSummary.style.display = '';
+                validationViewBtns.forEach(function (b) {
+                    b.classList.toggle('active', b.getAttribute('data-view') === 'checks');
+                });
+            }
+
+            try {
+                if (hasSSR) {
+                    runKatexOn(contentByTab.overview);
+                    contentByTab.overview.removeAttribute('data-ssr');
+                } else {
+                    var overviewDoc = await fetchDoc(groupId, itemId, 'overview');
+                    renderMarkdown(contentByTab.overview, overviewDoc);
+                }
+
+                if (tabVisibility.examples) {
+                    var examplesDoc = await fetchDoc(groupId, itemId, 'examples');
+                    renderMarkdown(contentByTab.examples, examplesDoc);
+                }
+                if (tabVisibility.validation) {
+                    var checksPromise = fetch(buildChecksUrl(groupId, itemId))
+                        .then(function (r) { return r.ok ? r.json() : { groups: [] }; })
+                        .then(function (data) { renderAccordion(data.groups); })
+                        .catch(function () { renderAccordion([]); });
+
+                    var sourcePromise = fetchDoc(groupId, itemId, 'validation')
+                        .then(function (doc) {
+                            validationSourceMarkdownRaw = doc;
+                            renderMarkdown(contentByTab.validation, doc);
+                            ensureValidationCopyButtons();
+                            highlightCodeBlocks(validationSourceView);
+                        })
+                        .catch(function () {
+                            validationSourceMarkdownRaw = '';
+                            renderMarkdown(contentByTab.validation, 'No validation source available.');
+                        });
+
+                    await Promise.all([checksPromise, sourcePromise]);
+                }
+            } catch (err) {
+                var msg = '# Load Error\n\nCould not load content for `' + groupId + '/' + itemId + '`.';
+                if (!hasSSR) {
+                    renderMarkdown(contentByTab.overview, msg);
+                }
+                if (tabVisibility.examples) {
+                    renderMarkdown(contentByTab.examples, msg);
+                }
+            }
+
+            scheduleMathRefresh();
+            buildTocForActiveTab();
+            setActiveTab('overview');
+
+            if (options.pushUrl) {
+                var nextUrl = versionPrefix + '/framework/' + encodeURIComponent(itemId) + '/';
+                if (window.location.pathname !== nextUrl) {
+                    window.history.pushState({ itemId: itemId }, '', nextUrl);
+                }
+            }
+        }
+
+        var navLinks = document.querySelectorAll('.framework-nav-link[data-group-id][data-item-id]:not(.is-nav-hidden)');
+
+        function setActiveNav(linkEl) {
+            navLinks.forEach(function (it) { it.classList.remove('active'); });
+            if (linkEl) {
+                linkEl.classList.add('active');
+                openAccordionForGroup(linkEl.getAttribute('data-group-id'));
+            }
+        }
+
+        function getLinkByItemId(itemId) {
+            return document.querySelector('.framework-nav-link[data-item-id="' + itemId + '"]');
+        }
+
+        function loadByItemId(itemId, pushUrl) {
+            var link = getLinkByItemId(itemId);
+            if (!link) return false;
+            setActiveNav(link);
+            var groupId = link.getAttribute('data-group-id');
+            var itemTitle = (link.textContent || '').trim();
+            loadItem(groupId, itemId, itemTitle, { pushUrl: !!pushUrl });
+            return true;
+        }
+
+        function parseItemIdFromPath() {
+            var match = window.location.pathname.match(/^(?:\/v\d+\.\d+)?\/framework\/([a-z0-9_]+)\/?$/);
+            return match ? match[1] : '';
+        }
+
+        navLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                var itemId = link.getAttribute('data-item-id');
+                if (itemId) {
+                    loadByItemId(itemId, true);
+                }
+            });
+        });
+
+        var loaded = false;
+        var pathItemId = parseItemIdFromPath();
+        if (pathItemId) {
+            loaded = loadByItemId(pathItemId, false);
+        }
+        if (!loaded && initialItemId) {
+            loaded = loadByItemId(initialItemId, false);
+        }
+        if (!loaded) {
+            var firstActive = document.querySelector('.framework-nav-link.active[data-group-id][data-item-id]');
+            if (firstActive) {
+                loaded = loadByItemId(firstActive.getAttribute('data-item-id'), false);
+            } else if (navLinks.length > 0) {
+                loaded = loadByItemId(navLinks[0].getAttribute('data-item-id'), false);
+            }
+        }
+
+        window.addEventListener('popstate', function () {
+            var itemId = parseItemIdFromPath();
+            if (itemId) {
+                loadByItemId(itemId, false);
+            }
+        });
+    });
+</script>
+{% endblock %}

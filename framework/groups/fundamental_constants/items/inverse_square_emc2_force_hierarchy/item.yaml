@@ -1,0 +1,11 @@
+groupId: fundamental_constants
+itemId: inverse_square_emc2_force_hierarchy
+title: Mass-Energy Equivalence
+order: 3
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

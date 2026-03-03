@@ -1,0 +1,11 @@
+groupId: fundamental_constants
+itemId: capstone_constants_suite
+title: Capstone Constants Suite
+order: 6
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

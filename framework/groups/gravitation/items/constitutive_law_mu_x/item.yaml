@@ -1,0 +1,11 @@
+groupId: gravitation
+itemId: constitutive_law_mu_x
+title: Constitutive Law mu(x)
+order: 5
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

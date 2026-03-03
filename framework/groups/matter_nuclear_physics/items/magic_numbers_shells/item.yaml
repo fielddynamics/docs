@@ -1,0 +1,11 @@
+groupId: matter_nuclear_physics
+itemId: magic_numbers_shells
+title: Magic Numbers and Shells
+order: 2
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

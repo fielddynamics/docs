@@ -1,0 +1,11 @@
+groupId: gravitation
+itemId: g_from_topology
+title: G from Topology
+order: 2
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for G from topology claims.

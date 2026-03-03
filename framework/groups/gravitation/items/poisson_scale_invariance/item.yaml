@@ -1,0 +1,11 @@
+groupId: gravitation
+itemId: poisson_scale_invariance
+title: Poisson Equation and Scale Invariance
+order: 4
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for Poisson equation and scale invariance claims.

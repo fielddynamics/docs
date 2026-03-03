@@ -1,0 +1,12 @@
+groupId: gravitation
+itemId: bimetric_locking
+title: Bimetric Locking
+order: 7
+status: draft
+visible: false
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

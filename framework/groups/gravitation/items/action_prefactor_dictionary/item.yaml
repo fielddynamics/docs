@@ -1,0 +1,12 @@
+groupId: gravitation
+itemId: action_prefactor_dictionary
+title: Action Prefactor Dictionary
+order: 11
+status: draft
+visible: false
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

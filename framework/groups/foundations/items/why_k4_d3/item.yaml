@@ -1,0 +1,15 @@
+groupId: foundations
+itemId: why_k4_d3
+title: Why k = 4 and d = 3
+order: 2
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for why k equals 4 and d equals 3 claims.
+
+tabs:
+  examples: false
+  validation: true

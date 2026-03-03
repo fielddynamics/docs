@@ -1,0 +1,11 @@
+groupId: gravitation
+itemId: scalar_tensor_completion
+title: Scalar-Tensor Completion
+order: 6
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

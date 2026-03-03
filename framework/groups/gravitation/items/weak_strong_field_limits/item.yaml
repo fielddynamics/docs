@@ -1,0 +1,12 @@
+groupId: gravitation
+itemId: weak_strong_field_limits
+title: Weak and Strong Field Limits
+order: 8
+status: draft
+visible: false
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

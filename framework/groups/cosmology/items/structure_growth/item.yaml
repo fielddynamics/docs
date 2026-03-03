@@ -1,0 +1,11 @@
+groupId: cosmology
+itemId: structure_growth
+title: Structure Growth
+order: 5
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

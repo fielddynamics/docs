@@ -1,0 +1,11 @@
+groupId: quantum_theory
+itemId: decoherence_timescale
+title: Decoherence Timescale
+order: 4
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

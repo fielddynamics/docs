@@ -1,0 +1,15 @@
+groupId: foundations
+itemId: stellated_octahedron
+title: The Stellated Octahedron
+order: 10
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for stellated octahedron claims.
+
+tabs:
+  examples: false
+  validation: false

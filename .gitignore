@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Environment
+.env
+venv/
+.venv/
+
+# Papers (internal notes, LaTeX, scripts; not part of the app)
+papers/
+
+# Docs (internal documentation; not part of the app)
+docs/
+
+# Internal (repo-root internal directory)
+internal/
+
+# Temporary local validation work
+framework/groups/gravitation/items/covariant_completion/temp/

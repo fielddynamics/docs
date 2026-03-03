@@ -1,0 +1,11 @@
+groupId: gauge_particle_physics
+itemId: electromagnetic_sector
+title: Electromagnetic Sector
+order: 1
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

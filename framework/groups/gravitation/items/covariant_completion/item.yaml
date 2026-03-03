@@ -1,0 +1,14 @@
+groupId: gravitation
+itemId: covariant_completion
+title: Covariant Completion
+order: 3
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoints:
+    - path: tests/validate.py
+      description: Overview validation suite
+    - path: tests/validate-extended.py
+      description: Extended validation suite

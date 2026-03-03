@@ -1,0 +1,11 @@
+groupId: quantum_theory
+itemId: born_rule_origin
+title: Born Rule Origin
+order: 1
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

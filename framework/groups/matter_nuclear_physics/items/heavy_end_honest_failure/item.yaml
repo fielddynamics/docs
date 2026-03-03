@@ -1,0 +1,11 @@
+groupId: matter_nuclear_physics
+itemId: heavy_end_honest_failure
+title: Heavy End Honest Failure
+order: 4
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Placeholder validation for this item.

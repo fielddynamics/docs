@@ -1,0 +1,11 @@
+groupId: fundamental_constants
+itemId: h0_prediction
+title: H0 Prediction
+order: 4
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for H0 prediction claims.
