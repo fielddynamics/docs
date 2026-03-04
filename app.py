@@ -23,6 +23,7 @@ import re
 import subprocess
 import sys
 
+import latex2mathml.converter
 import markdown as md_lib
 from flask import (
     Flask,
@@ -159,10 +160,41 @@ _MD = md_lib.Markdown(
 )
 
 
+def _latex_to_mathml(latex_src, display=False):
+    """Convert a LaTeX string to MathML, falling back to raw LaTeX on error."""
+    try:
+        mathml = latex2mathml.converter.convert(latex_src)
+        if display:
+            mathml = mathml.replace('display="inline"', 'display="block"', 1)
+        return mathml
+    except Exception:
+        if display:
+            return "<p>$$" + latex_src + "$$</p>"
+        return "$" + latex_src + "$"
+
+
+def _convert_math_blocks(html):
+    """Replace $$...$$ and $...$ with MathML in rendered HTML."""
+    html = re.sub(
+        r"\$\$\s*(.+?)\s*\$\$",
+        lambda m: _latex_to_mathml(m.group(1), display=True),
+        html,
+        flags=re.DOTALL,
+    )
+    html = re.sub(
+        r"(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)",
+        lambda m: _latex_to_mathml(m.group(1), display=False),
+        html,
+    )
+    return html
+
+
 def render_markdown_to_html(raw_md):
-    """Convert a markdown string to HTML with math blocks preserved."""
+    """Convert a markdown string to HTML with math rendered as MathML."""
     _MD.reset()
-    return _MD.convert(raw_md)
+    html = _MD.convert(raw_md)
+    html = _convert_math_blocks(html)
+    return html
 
 
 def extract_page_meta(raw_md):

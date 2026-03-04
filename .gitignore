@@ -37,3 +37,7 @@ internal/
 
 # Temporary local validation work
 framework/groups/gravitation/items/covariant_completion/temp/
+
+# Temporary folders
+temp/
+**/temp/
