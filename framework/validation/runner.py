@@ -13,6 +13,7 @@ import inspect
 import json
 import sys
 import time
+import traceback
 from contextlib import redirect_stderr, redirect_stdout
 
 
@@ -21,16 +22,34 @@ def run_checks(validate_path):
     spec = importlib.util.spec_from_file_location("_validate_target", validate_path)
     if spec is None or spec.loader is None:
         return {
-            "error": "Could not load module from %s" % validate_path,
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "errors": 0,
-            "checks": [],
+            "total": 0, "passed": 0, "failed": 0, "errors": 1,
+            "checks": [{
+                "name": "import_error",
+                "doc": "",
+                "status": "ERROR",
+                "duration_ms": 0,
+                "message": "Could not load module from %s" % validate_path,
+                "output": "",
+            }],
         }
 
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    try:
+        spec.loader.exec_module(mod)
+    except Exception as exc:
+        tb = traceback.format_exc()
+        sys.stderr.write("[IMPORT ERROR] %s\n%s\n" % (validate_path, tb))
+        return {
+            "total": 0, "passed": 0, "failed": 0, "errors": 1,
+            "checks": [{
+                "name": "import_error",
+                "doc": "",
+                "status": "ERROR",
+                "duration_ms": 0,
+                "message": "%s: %s" % (type(exc).__name__, exc),
+                "output": "",
+            }],
+        }
 
     check_fns = sorted(
         (name, fn)
@@ -54,10 +73,14 @@ def run_checks(validate_path):
             output = stream.getvalue().strip()
             status = "FAIL"
             message = str(exc)
+            tb = traceback.format_exc()
+            sys.stderr.write("[FAIL] %s: %s\n%s\n" % (name, exc, tb))
         except Exception as exc:
             output = stream.getvalue().strip()
             status = "ERROR"
             message = "%s: %s" % (type(exc).__name__, exc)
+            tb = traceback.format_exc()
+            sys.stderr.write("[ERROR] %s: %s\n%s\n" % (name, message, tb))
 
         duration_ms = round((time.perf_counter() - t0) * 1000, 2)
         results.append({
@@ -83,5 +106,20 @@ if __name__ == "__main__":
         sys.stderr.write("Usage: python runner.py <validate.py path>\n")
         sys.exit(2)
 
-    result = run_checks(sys.argv[1])
+    try:
+        result = run_checks(sys.argv[1])
+    except Exception as exc:
+        tb = traceback.format_exc()
+        sys.stderr.write("[RUNNER CRASH]\n%s\n" % tb)
+        result = {
+            "total": 0, "passed": 0, "failed": 0, "errors": 1,
+            "checks": [{
+                "name": "runner_crash",
+                "doc": "",
+                "status": "ERROR",
+                "duration_ms": 0,
+                "message": "%s: %s" % (type(exc).__name__, exc),
+                "output": "",
+            }],
+        }
     json.dump(result, sys.stdout, indent=2)

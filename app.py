@@ -10,8 +10,8 @@ Supports framework-level versioning via /v{major.minor}/framework/ URL prefix.
 Archived versions are served from frozen framework-v{X.Y}/ snapshot directories.
 
 Usage:
-    python app.py              # Development server on http://localhost:5000
-    flask run                  # Same, via Flask CLI
+    python app.py                            # Development server
+    gunicorn --bind 0.0.0.0:8000 app:app     # Azure / production
 """
 
 __version__ = "1.0"
@@ -114,9 +114,9 @@ _SAFE_ID_RE = re.compile(r"^[a-z0-9_]+$")
 # Versioning helpers
 # ---------------------------------------------------------------------------
 
-def _read_manifest_version(app_root):
-    """Read the version string from framework/manifest.yaml."""
-    manifest_path = os.path.join(app_root, "framework", "manifest.yaml")
+def _read_manifest_version(framework_root):
+    """Read the version string from manifest.yaml under the framework root."""
+    manifest_path = os.path.join(framework_root, "manifest.yaml")
     if os.path.isfile(manifest_path):
         with open(manifest_path, "r", encoding="utf-8") as fh:
             for line in fh:
@@ -155,12 +155,7 @@ def _find_item_group(framework_root, item_id):
 # ---------------------------------------------------------------------------
 
 _MD = md_lib.Markdown(
-    extensions=["tables", "fenced_code", "mdx_math"],
-    extension_configs={
-        "mdx_math": {
-            "enable_dollar_delimiter": True,
-        },
-    },
+    extensions=["tables", "fenced_code"],
 )
 
 
@@ -434,7 +429,8 @@ def create_app():
         template_folder="templates",
     )
 
-    fw_version = _read_manifest_version(app.root_path)
+    framework_root = os.path.join(app.root_path, "framework")
+    fw_version = _read_manifest_version(framework_root)
     archived_versions = _scan_archived_versions(app.root_path)
 
     @app.context_processor
@@ -512,7 +508,7 @@ def create_app():
                 abort(404)
             blocks = ["# Validation", ""]
             for entry in entries:
-                rel_path = "framework/groups/{}/items/{}/{}".format(
+                rel_path = "groups/{}/items/{}/{}".format(
                     group_id, item_id, entry["path"]
                 )
                 abs_path = os.path.join(item_dir, entry["path"].replace("/", os.sep))
@@ -623,10 +619,16 @@ def create_app():
                     [sys.executable, _RUNNER_PATH, validate_path],
                     capture_output=True,
                     text=True,
-                    timeout=60,
+                    timeout=120,
                 )
+                if result.stderr:
+                    app.logger.warning(
+                        "Runner stderr for %s:\n%s",
+                        entry["path"], result.stderr.strip(),
+                    )
                 report = json.loads(result.stdout)
             except subprocess.TimeoutExpired:
+                app.logger.error("Runner timeout for %s", entry["path"])
                 report = {
                     "total": 0,
                     "passed": 0,
@@ -636,11 +638,18 @@ def create_app():
                         "name": "timeout",
                         "doc": "",
                         "status": "ERROR",
-                        "duration_ms": 60000,
-                        "message": "Execution timed out after 60 seconds",
+                        "duration_ms": 120000,
+                        "message": "Execution timed out after 120 seconds",
+                        "output": "",
                     }],
                 }
-            except (json.JSONDecodeError, Exception) as exc:
+            except json.JSONDecodeError:
+                stderr_text = (getattr(result, "stderr", "") or "").strip()
+                stdout_text = (getattr(result, "stdout", "") or "").strip()
+                msg = stderr_text or stdout_text or "Runner produced no output"
+                app.logger.error(
+                    "Runner JSON error for %s:\n%s", entry["path"], msg,
+                )
                 report = {
                     "total": 0,
                     "passed": 0,
@@ -651,7 +660,27 @@ def create_app():
                         "doc": "",
                         "status": "ERROR",
                         "duration_ms": 0,
-                        "message": str(exc),
+                        "message": msg,
+                        "output": "",
+                    }],
+                }
+            except Exception as exc:
+                msg = "%s: %s" % (type(exc).__name__, exc)
+                app.logger.error(
+                    "Runner exception for %s: %s", entry["path"], msg,
+                )
+                report = {
+                    "total": 0,
+                    "passed": 0,
+                    "failed": 0,
+                    "errors": 1,
+                    "checks": [{
+                        "name": "runner_error",
+                        "doc": "",
+                        "status": "ERROR",
+                        "duration_ms": 0,
+                        "message": msg,
+                        "output": "",
                     }],
                 }
 
@@ -685,7 +714,7 @@ def create_app():
         return send_from_directory(images_dir, filename)
 
     def _serve_item_image(framework_root, group_id, item_id, filename):
-        """Serve files from framework/groups/<group>/items/<item>/images/."""
+        """Serve files from groups/<group>/items/<item>/images/."""
         if not _SAFE_ID_RE.match(group_id) or not _SAFE_ID_RE.match(item_id):
             abort(404)
         item_dir = _resolve_item_dir(framework_root, group_id, item_id)
@@ -697,25 +726,107 @@ def create_app():
         return send_from_directory(item_images_dir, filename)
 
     # ------------------------------------------------------------------
+    # SEO and AI discovery
+    # ------------------------------------------------------------------
+
+    @app.route("/sitemap.xml")
+    def sitemap():
+        base = "https://docs.fielddynamics.org"
+        today = __import__("datetime").date.today().isoformat()
+        urls = []
+        urls.append({"loc": base + "/", "priority": "1.0"})
+        urls.append({"loc": base + "/framework/", "priority": "0.9"})
+        urls.append({"loc": base + "/tests/", "priority": "0.7"})
+        for item_id, group_id in ITEM_TO_GROUP.items():
+            urls.append({
+                "loc": base + "/framework/" + item_id + "/",
+                "priority": "0.8",
+            })
+            item_dir = _resolve_item_dir(framework_root, group_id, item_id)
+            for entry in _read_validation_entries(item_dir):
+                filename = entry["path"].replace("tests/", "")
+                urls.append({
+                    "loc": base + "/tests/" + group_id + "/" + item_id + "/" + filename,
+                    "priority": "0.6",
+                })
+        lines = ['<?xml version="1.0" encoding="UTF-8"?>']
+        lines.append(
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        )
+        for entry in urls:
+            lines.append("  <url>")
+            lines.append("    <loc>%s</loc>" % entry["loc"])
+            lines.append("    <lastmod>%s</lastmod>" % today)
+            lines.append("    <priority>%s</priority>" % entry["priority"])
+            lines.append("  </url>")
+        lines.append("</urlset>")
+        xml = "\n".join(lines)
+        return Response(xml, mimetype="application/xml")
+
+    @app.route("/llms.txt")
+    def llms_txt():
+        path = os.path.join(app.root_path, "llms.txt")
+        if not os.path.isfile(path):
+            abort(404)
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return Response(content, mimetype="text/plain; charset=utf-8")
+
+    # ------------------------------------------------------------------
+    # Test file routes
+    # ------------------------------------------------------------------
+
+    @app.route("/tests/")
+    def tests_index():
+        """Plain-text index of every validation file in the framework."""
+        lines = ["# Field Dynamics Validation Tests", ""]
+        for item_id, group_id in sorted(ITEM_TO_GROUP.items()):
+            item_dir = _resolve_item_dir(framework_root, group_id, item_id)
+            entries = _read_validation_entries(item_dir)
+            if not entries:
+                continue
+            lines.append("## %s/%s" % (group_id, item_id))
+            for entry in entries:
+                filename = entry["path"].replace("tests/", "")
+                url = "/tests/%s/%s/%s" % (group_id, item_id, filename)
+                lines.append("  %s" % url)
+            lines.append("")
+        return Response("\n".join(lines), mimetype="text/plain; charset=utf-8")
+
+    @app.route("/tests/<group_id>/<item_id>/<filename>")
+    def tests_file(group_id, item_id, filename):
+        """Serve a raw validation .py file as plain text."""
+        if not _SAFE_ID_RE.match(group_id) or not _SAFE_ID_RE.match(item_id):
+            abort(404)
+        if not filename.startswith("validate") or not filename.endswith(".py"):
+            abort(404)
+        item_dir = _resolve_item_dir(framework_root, group_id, item_id)
+        if not os.path.isdir(item_dir):
+            abort(404)
+        test_path = os.path.join(item_dir, "tests", filename)
+        if not os.path.isfile(test_path):
+            abort(404)
+        with open(test_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return Response(content, mimetype="text/plain; charset=utf-8")
+
+    # ------------------------------------------------------------------
     # Page routes (latest)
     # ------------------------------------------------------------------
 
     @app.route("/")
     def root():
-        fw_root = os.path.join(app.root_path, "framework")
-        return _render_framework_page(fw_root, None)
+        return _render_framework_page(framework_root, None)
 
     @app.route("/home")
     def home():
-        fw_root = os.path.join(app.root_path, "framework")
-        return _render_framework_page(fw_root, None)
+        return _render_framework_page(framework_root, None)
 
     @app.route("/framework")
     @app.route("/framework/")
     @app.route("/framework/<item_id>/")
     def framework(item_id=None):
-        fw_root = os.path.join(app.root_path, "framework")
-        return _render_framework_page(fw_root, item_id)
+        return _render_framework_page(framework_root, item_id)
 
     @app.route("/images/<path:filename>")
     def global_images(filename):
@@ -723,8 +834,7 @@ def create_app():
 
     @app.route("/framework/assets/<group_id>/<item_id>/<path:filename>")
     def framework_item_image(group_id, item_id, filename):
-        fw_root = os.path.join(app.root_path, "framework")
-        return _serve_item_image(fw_root, group_id, item_id, filename)
+        return _serve_item_image(framework_root, group_id, item_id, filename)
 
     # ------------------------------------------------------------------
     # Page routes (versioned)
@@ -757,13 +867,11 @@ def create_app():
 
     @app.route("/api/framework/item/<group_id>/<item_id>/<doc_kind>")
     def framework_item_doc(group_id, item_id, doc_kind):
-        fw_root = os.path.join(app.root_path, "framework")
-        return _serve_item_doc(fw_root, group_id, item_id, doc_kind)
+        return _serve_item_doc(framework_root, group_id, item_id, doc_kind)
 
     @app.route("/api/framework/item-meta/<group_id>/<item_id>")
     def framework_item_meta(group_id, item_id):
-        fw_root = os.path.join(app.root_path, "framework")
-        return _serve_item_meta(fw_root, group_id, item_id)
+        return _serve_item_meta(framework_root, group_id, item_id)
 
     # ------------------------------------------------------------------
     # Validation checks API (latest)
@@ -771,16 +879,14 @@ def create_app():
 
     @app.route("/api/framework/item/<group_id>/<item_id>/checks")
     def framework_item_checks(group_id, item_id):
-        fw_root = os.path.join(app.root_path, "framework")
-        return _serve_item_checks(fw_root, group_id, item_id)
+        return _serve_item_checks(framework_root, group_id, item_id)
 
     @app.route(
         "/api/framework/item/<group_id>/<item_id>/checks/run",
         methods=["POST"],
     )
     def framework_item_checks_run(group_id, item_id):
-        fw_root = os.path.join(app.root_path, "framework")
-        return _run_item_checks(fw_root, group_id, item_id)
+        return _run_item_checks(framework_root, group_id, item_id)
 
     # ------------------------------------------------------------------
     # Content API (versioned)
@@ -807,6 +913,12 @@ def create_app():
     return app
 
 
+# Module-level app object required for gunicorn (e.g. gunicorn app:app).
+# Harmless when running directly via python app.py.
+app = create_app()
+
+
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "1") == "1"
+    app.run(debug=debug, host="0.0.0.0", port=port)

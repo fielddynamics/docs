@@ -309,8 +309,15 @@
 <div class="screen-container">
     <div class="screen active framework-screen">
         <div class="analysis-body framework-body">
+            <div class="framework-mobile-nav-backdrop" id="framework-mobile-nav-backdrop" hidden></div>
             <aside class="left-panel framework-left-panel" id="left-panel">
                 <div class="framework-sidebar-header">
+                    <button class="framework-mobile-nav-close nav-mobile-toggle" id="framework-mobile-nav-close" type="button" aria-label="Close navigation">
+                        <svg class="nav-mobile-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                            <path d="M9 5v14"></path>
+                        </svg>
+                    </button>
                     <h2 class="framework-sidebar-title">Gravity Field Dynamics</h2>
                 </div>
 
@@ -436,10 +443,6 @@
                 {% endif %}
                 <section class="framework-content-card">
                     <h1 class="framework-title">{% if ssr_title %}{{ ssr_title }}{% else %}Field Dynamics Framework{% endif %}</h1>
-                    <p class="framework-subtitle">
-                        {% if ssr_group_id %}Loaded from framework/groups/{{ ssr_group_id }}/items/{{ initial_item_id }}/{% else %}Documentation style workspace with tabs and a content guide.{% endif %}
-                    </p>
-
                     <div class="framework-main-tabs" role="tablist" aria-label="Framework content tabs">
                         <button class="framework-main-tab active" data-tab-id="overview" role="tab" aria-selected="true">Overview</button>
                         <button class="framework-main-tab" data-tab-id="examples" role="tab" aria-selected="false">Examples</button>
@@ -491,9 +494,79 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.add('framework-page');
         var leftPanel = document.getElementById('left-panel');
         var resizeHandle = document.getElementById('resize-handle');
+        var mobileNavToggle = document.getElementById('framework-header-nav-toggle');
+        var mobileNavClose = document.getElementById('framework-mobile-nav-close');
+        var mobileNavBackdrop = document.getElementById('framework-mobile-nav-backdrop');
         var isResizing = false;
+        var mobileNavMedia = window.matchMedia('(max-width: 980px)');
+
+        function isMobileNavMode() {
+            return mobileNavMedia.matches;
+        }
+
+        function setMobileNavExpanded(expanded) {
+            if (mobileNavToggle) {
+                mobileNavToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            }
+        }
+
+        function openMobileNav() {
+            if (!isMobileNavMode()) return;
+            document.body.classList.add('framework-nav-open');
+            if (mobileNavBackdrop) {
+                mobileNavBackdrop.hidden = false;
+            }
+            setMobileNavExpanded(true);
+        }
+
+        function closeMobileNav() {
+            document.body.classList.remove('framework-nav-open');
+            if (mobileNavBackdrop) {
+                mobileNavBackdrop.hidden = true;
+            }
+            setMobileNavExpanded(false);
+        }
+
+        if (mobileNavToggle) {
+            mobileNavToggle.addEventListener('click', function () {
+                if (document.body.classList.contains('framework-nav-open')) {
+                    closeMobileNav();
+                } else {
+                    openMobileNav();
+                }
+            });
+        }
+
+        if (mobileNavClose) {
+            mobileNavClose.addEventListener('click', closeMobileNav);
+        }
+
+        if (mobileNavBackdrop) {
+            mobileNavBackdrop.addEventListener('click', closeMobileNav);
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeMobileNav();
+            }
+        });
+
+        mobileNavMedia.addEventListener('change', function (event) {
+            if (!event.matches) {
+                closeMobileNav();
+            } else {
+                setMobileNavExpanded(false);
+            }
+        });
+
+        if (!isMobileNavMode()) {
+            closeMobileNav();
+        } else {
+            setMobileNavExpanded(false);
+        }
 
         if (leftPanel && resizeHandle) {
             resizeHandle.addEventListener('mousedown', function () {
@@ -1139,7 +1212,31 @@
                             '"][data-check-name="' + c.name + '"]'
                         )
                         : null;
-                    if (!el) continue;
+                    if (!el) {
+                        if (c.status === 'ERROR' || c.status === 'FAIL') {
+                            console.error('[' + groupPath + '] ' + c.name + ': ' + c.message);
+                            var groupEl = validationAccordion
+                                ? validationAccordion.querySelector(
+                                    '.validation-group[data-validation-file="' + groupPath + '"]'
+                                )
+                                : null;
+                            if (groupEl) {
+                                var banner = document.createElement('div');
+                                banner.className = 'validation-check-message';
+                                banner.textContent = c.name + ': ' + c.message;
+                                var groupBody = groupEl.querySelector('.validation-accordion-group');
+                                if (groupBody) groupBody.prepend(banner);
+                                if (!groupEl.classList.contains('open')) {
+                                    groupEl.classList.add('open');
+                                    var gt = groupEl.querySelector('.validation-group-toggle');
+                                    if (gt) gt.setAttribute('aria-expanded', 'true');
+                                    var gc = groupEl.querySelector('.validation-group-chevron');
+                                    if (gc) gc.textContent = '-';
+                                }
+                            }
+                        }
+                        continue;
+                    }
 
                     var badge = el.querySelector('.validation-badge');
                     badge.textContent = c.status;
@@ -1370,6 +1467,9 @@
                 var itemId = link.getAttribute('data-item-id');
                 if (itemId) {
                     loadByItemId(itemId, true);
+                }
+                if (isMobileNavMode()) {
+                    closeMobileNav();
                 }
             });
         });
