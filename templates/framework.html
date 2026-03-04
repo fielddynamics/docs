@@ -1349,11 +1349,13 @@
             selectedItemId = itemId;
             selectedItemTitle = itemTitle;
 
+            document.title = itemTitle + ' | Field Dynamics';
+
             if (headingTitle) {
                 headingTitle.textContent = itemTitle;
             }
             if (headingSubtitle) {
-                headingSubtitle.textContent = 'Loaded from framework/' + 'groups/' + groupId + '/items/' + itemId + '/';
+                headingSubtitle.textContent = '';
             }
 
             var itemMeta = null;

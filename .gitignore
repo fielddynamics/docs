@@ -41,3 +41,6 @@ framework/groups/gravitation/items/covariant_completion/temp/
 # Temporary folders
 temp/
 **/temp/
+
+# Deployment artifacts
+deploy/
