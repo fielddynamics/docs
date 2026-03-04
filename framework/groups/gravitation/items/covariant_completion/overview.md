@@ -14,9 +14,13 @@ S = \int d^4x \sqrt{-g}\left[\frac{R}{16\pi G} - \frac{a_0^2}{8\pi G}F(y) - \fra
 $$
 
 Each term has one specific job, and each carries a prefactor determined directly by the stellated octahedron.
+
 **$R/(16\pi G)$, the Curvature Term.** This is standard general relativity. The Ricci scalar $R$ governs the shape of spacetime: how clocks tick, rulers stretch, and light bends. The prefactor $16\pi G = K^2 \cdot \pi \cdot G_{\text{eff}}$ contains the $K^2 = 16$ face-coupling channels, the solid angle per face $\pi$, and the effective gravitational constant. The full coupling hierarchy is preserved inside $G$ through the exponent $21 = f(K, +1)$, the numerator $17 = f(K, 0)$, and the denominator $13 = f(K, -1)$. The curvature term carries the topology compressed into a single constant.
+
 **$-a_0^2/(8\pi G)\,F(y)$, the Scalar Sector.** This governs how the scalar field $\Phi$ responds to matter. The prefactor $8\pi G = 2^D \cdot \pi \cdot G_{\text{eff}}$ contains $2^D = 8$, the vertex-space cardinality of the stellated octahedron. No free functions remain. The topology fixes the prefactor, and the kinetic functional $F(y)$ is fixed by the structural levels of the polynomial.
+
 **$-\frac{1}{4} e^{-2\Phi/c^2} F_{\mu\nu}F^{\mu\nu}$, the Electromagnetic Coupling.** Photons do not see the bare metric. They see an effective metric modified by the disformal factor $e^{-2\Phi/c^2}$. Without this term, lensing would produce only half the observed deflection. The factor of $2$ in the exponent has the same structural origin as the $2$ in $E = mc^2$: it counts the two tetrahedra. Photons must couple to the full dual tetrahedral potential, ensuring the PPN parameter $\gamma = 1$ exactly (consistent with the Cassini bound of $2.1 \pm 2.3 \times 10^{-5}$), and guaranteeing that lensing mass equals dynamical mass.
+
 **$\mathcal{L}_{\text{matter}}$, Matter.** Ordinary matter, minimally coupled to the metric. Stars, gas, dust, everything on the right side of Einstein's equations. (Einstein, 1915) There is no modification, no coupling to the scalar field, and no violation of the equivalence principle.
 ### The Prefactors Are the Topology
 

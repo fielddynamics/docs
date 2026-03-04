@@ -2,7 +2,7 @@
 
 If the gravitational field has parts, those parts must be complete. This is not a proposal. It is a requirement that general relativity has enforced for over a century.
 At every point in spacetime, the gravitational field must define a full local frame: one time direction and three space directions, all independent, none missing. If any direction were absent, geometry would be undefined there. Clocks could not tick. Rulers could not measure. Light could not know which way to bend. The field equations themselves could not be written down. A gap in the frame is not a minor deficiency. It is the collapse of spacetime at that point.
-General relativity expresses this requirement in a single condition: the determinant of the metric must never vanish. In the language of the metric tensor, det(g) != 0. Without this condition, the inverse metric is undefined, indices cannot be raised and lowered, and Einstein's equations have no meaning. Every student of general relativity encounters this in their first course. It is treated as mathematical housekeeping, a condition you check and move on from. (Einstein, 1915)
+General relativity expresses this requirement in a single condition: the determinant of the metric must never vanish. In the language of the metric tensor, det(g) != 0. Without this condition, the inverse metric is undefined, indices cannot be raised and lowered, and Einstein's equations have no meaning. Every student of general relativity encounters this in their first course. It is treated as mathematical housekeeping, a condition you check and move on from.
 Field closure is that same condition, taken seriously as geometry.
 
 In the tetrad formalism, the metric decomposes into four basis vectors at each point, the tetrad, and the condition det(g) != 0 becomes the requirement that these four vectors span the full tangent space. No vector can be zero. No two can point in the same direction. Four independent legs must stand, everywhere, always. In simplicial quantum gravity, Barbieri showed that the equivalent discrete condition, four face normal vectors summing to zero, uniquely defines a tetrahedron at each node of the gravitational field. The continuous condition and the discrete condition say the same thing: four independent directions must close around a volume.
@@ -13,6 +13,3 @@ This binary character is the reason field closure is so constraining. It does no
 
 The next question follows immediately. If the field must close, and closure in three spatial dimensions requires four faces, what geometry does that closure produce? The answer is the simplest solid in three dimensions: the tetrahedron. And as we will see, one tetrahedron is not enough.
 
-## References
-
-Einstein, A. (1915). Die Feldgleichungen der Gravitation. Sitzungsber. Preuss. Akad. Wiss. 844.

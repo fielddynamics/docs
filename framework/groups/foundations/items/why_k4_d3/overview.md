@@ -30,9 +30,7 @@ Four faces require three spatial dimensions. But why three? Could the universe h
 There is an equation that answers this. It asks: in how many dimensions can two simplices exactly partition the vertices of a hypercube? A simplex in $d$ dimensions has $d + 1$ vertices, so two simplices have $2(d + 1)$ vertices. A hypercube in $d$ dimensions has $2^d$ vertices. The equation is:
 
 $$
-
 2(d + 1) = 2^d
-
 $$
 
 Check it dimension by dimension. At $d = 1$: the left side gives $4$, the right side gives $2$. No match. At $d = 2$: left gives $6$, right gives $4$. No match. At $d = 3$: left gives $8$, right gives $8$. Match. At $d = 4$: left gives $10$, right gives $16$. No match. At $d = 5$: left gives $12$, right gives $32$. The gap only widens.
