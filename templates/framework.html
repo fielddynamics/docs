@@ -326,7 +326,11 @@
                         <section class="framework-nav-accordion-item open" data-accordion-id="essentials">
                             <button class="framework-nav-accordion-toggle" type="button" aria-expanded="true" aria-controls="framework-accordion-panel-essentials">
                                 <span class="framework-nav-accordion-title">CORE</span>
-                                <span class="framework-nav-accordion-chevron" aria-hidden="true">−</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </span>
                             </button>
                             <div class="framework-nav-accordion-panel" id="framework-accordion-panel-essentials">
                                 <div class="framework-nav-group" data-group-id="foundations">
@@ -371,7 +375,11 @@
                         <section class="framework-nav-accordion-item" data-accordion-id="applications" hidden>
                             <button class="framework-nav-accordion-toggle" type="button" aria-expanded="false" aria-controls="framework-accordion-panel-applications">
                                 <span class="framework-nav-accordion-title">APPLICATIONS</span>
-                                <span class="framework-nav-accordion-chevron" aria-hidden="true">+</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </span>
                             </button>
                             <div class="framework-nav-accordion-panel" id="framework-accordion-panel-applications" hidden>
                                 <div class="framework-nav-group" data-group-id="matter_nuclear_physics">
@@ -416,7 +424,11 @@
                         <section class="framework-nav-accordion-item" data-accordion-id="engine" hidden>
                             <button class="framework-nav-accordion-toggle" type="button" aria-expanded="false" aria-controls="framework-accordion-panel-engine">
                                 <span class="framework-nav-accordion-title">ENGINE</span>
-                                <span class="framework-nav-accordion-chevron" aria-hidden="true">+</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </span>
                             </button>
                             <div class="framework-nav-accordion-panel" id="framework-accordion-panel-engine" hidden>
                                 <div class="framework-nav-group" data-group-id="engine">
@@ -703,7 +715,6 @@
 
                 if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 if (panel) panel.hidden = !isOpen;
-                if (chevron) chevron.textContent = isOpen ? '−' : '+';
             });
         }
 

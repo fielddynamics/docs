@@ -3771,7 +3771,8 @@ input[type="range"]::-moz-range-thumb:hover {
 .framework-left-panel {
     width: 380px;
     padding: 20px 20px 20px 30px;
-    overflow-y: auto;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
 }
 
 .framework-sidebar-header {
@@ -3840,6 +3841,23 @@ input[type="range"]::-moz-range-thumb:hover {
     color: #6f7c96;
     font-size: 1em;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.framework-nav-accordion-chevron svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.framework-nav-accordion-item.open .framework-nav-accordion-chevron {
+    transform: rotate(180deg);
+    color: #8fc0ff;
 }
 
 .framework-nav-accordion-panel {

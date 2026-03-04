@@ -22,6 +22,7 @@ Poisson field equation:  div[mu * grad(Phi)] = 4 pi G rho
 Source acceleration:  g_s = g_t^2 / (a_0 + g_t)
 Mass decoder:  M_dec(r) = r v^4 / [G (a_0 r + v^2)]
 Kinetic functional:  F(y) = y - 2 sqrt(y) + 2 ln(1 + sqrt(y))
+Covariant action:  S = int d^4x sqrt(-g) [R/(16 pi G) - a_0^2/(8 pi G) F(y) - 1/4 e^{-2 Phi/c^2} F_{mu nu}F^{mu nu} + L_matter]
 
 ## Key physical results
 Electron mass: three independent derivation routes converge on
