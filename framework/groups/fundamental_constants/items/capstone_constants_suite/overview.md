@@ -15,7 +15,7 @@ No parameter in this table is fitted to data. The only empirical inputs are thre
 | Quantity | GFD Prediction | Measured Value | Agreement | How It's Derived |
 |---|---|---|---|---|
 | **Gravitational constant G** | 6.666 x 10^-11 (tree) | 6.674 x 10^-11 m^3/(kg s^2) | 0.12% tree, 0.001% one loop | (17/13) x alpha^21 x hbar c / m_e^2 |
-| **Fine structure constant 1/alpha** | 137.0357 | 137.0360 | 0.00021% | $1 + 2K(K^2 + 1) + \frac{1}{K(K + D)}$ |
+| **Fine structure constant 1/alpha** | 137.0357 | 137.0360 | 0.00021% | Breadth $1 + 8 \times 17$ plus one geometric cycle $1/28$ |
 | **Electron mass m_e** | 9.11 x 10^-31 kg | 9.109 x 10^-31 kg | 0.1% | Closure topology: two equations, two unknowns |
 | **Hubble constant H0** | 70.21 km/s/Mpc | 70.0 +/- 12.0 (GW170817) | 0.3% | 2pi a0 / (c sqrt(K/pi)) |
 | **Electron spin** | hbar/2 | hbar/2 | Exact | (2/8) x 2hbar (temporal face fraction) |
@@ -46,10 +46,10 @@ Every integer that appears in the framework traces to K = 4 and D = 3:
 | 12 | Edges of stellated octahedron | Lorentz generators, 2 x C(4,2) |
 | 13 | Spatial structure (KD + 1) | Denominator of G prefactor |
 | 16 | Bimetric coupling channels (K^2) | Frame transition matrix, Einstein Hilbert action |
-| 17 | Coupling capacity (K^2 + 1) | Numerator of G prefactor, Hamiltonian interaction space |
+| 17 | Coupling depth at Field Origin (K^2 + 1) | Numerator of G prefactor, f(K,0) at each evaluation site |
 | 21 | Full coupling depth (1 + K + K^2) | Exponent in G, geometric series on simplex |
 | 28 | Total geometric elements (V+E+F) | K(K+D), fine structure fraction 1/28 |
-| 137 | Hamiltonian interaction states | 1 + 2K(K^2+1), integer part of 1/alpha |
+| 137 | Coupling breadth (distributed states) | 1 + 8 x 17 = 1 + 2K(K^2+1), integer part of 1/alpha |
 
 ## What No Other Framework Does
 

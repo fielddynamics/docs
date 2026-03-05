@@ -1,0 +1,14 @@
+groupId: fundamental_constants
+itemId: electron_spin
+title: Electron Spin
+order: 3
+status: draft
+content:
+  overview: overview.md
+  examples: examples.md
+tests:
+  entrypoint: tests/validate.py
+  description: Overview validation for electron spin derivation claims.
+
+tabs:
+  examples: false

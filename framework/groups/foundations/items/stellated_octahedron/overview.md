@@ -1,7 +1,7 @@
 # The Stellated Octahedron
 
 The previous nine pages constructed the gravitational field envelope piece by piece: field closure selected the simplex, the simplex fixed K = 4 and D = 3, the dual chamber requirement doubled the structure, and the 28 geometric elements catalogued every component. This page presents the complete object.
-![Figure 1, Stellated octahedron](../assets/foundations/stellated_octahedron/stellated_octahedron.png)
+![Figure 1, Stellated octahedron [interactive:fig1_dual_tetrahedral_field_chamber.html]](/framework/assets/foundations/stellated_octahedron/stellated_octahedron.png)
 
 Figure 1. The dual tetrahedral field chamber. Four million points are sampled uniformly in local frame coordinates and tested against the half space inequalities $L_i(p)$ defined in the text. Points that satisfy the TetA bounds are shown in cyan, those satisfying TetB in red, and those inside both, the shared octahedral Field Origin, in gold. No mesh or curve fitting is used. Each face of TetA is subdivided into three exposed corners and one inverted core where the opposing vertex penetrates, giving $4 \times 4 = 16$ geometric channels.
 
@@ -9,8 +9,31 @@ Two tetrahedra, interlocked, sharing a single centre. One points up, one points 
 
 ## What You Are Looking At
 
-Eight vertices, four per tetrahedron, split by binary parity into two groups of four. Twelve edges, six per tetrahedron, all the same length, forming the structural skeleton. Eight triangular faces, four per chamber, define the chamber geometry. Active interaction occurs through four coupled faces between TetA and TetB. And at the centre, the Field Origin, where the two chambers touch and all four body diagonals cross.
-These are the 28 geometric elements. Every one of them carries a physical role. The vertices are the binary state space. The edges are the Lorentz generators, the spin connection of general relativity. The faces are the chamber boundaries, split 3+1 into three spatial and one temporal per chamber. The active coupling set is four coupled faces between TetA and TetB. The Field Origin is where the constitutive law gives $\mu(1) = 1/2$ and the two chambers contribute equally.
+A tetrad is a set of four vector fields. In the local orthonormal frame, the spatial components of a regular tetrad point along four directions: the four face normals of a tetrahedron. These directions can be written as four linear projections of the local coordinates:
+
+$$
+v_1 = x + y + z, \quad v_2 = x - y - z, \quad v_3 = -x + y - z, \quad v_4 = -x - y + z
+$$
+
+The primary field chamber (TetA) is the region where all four projections are bounded:
+
+$$
+\text{TetA}: \quad \max(v_1, v_2, v_3, v_4) \leq 1
+$$
+
+The inverted dual (TetB) satisfies the opposite inequality:
+
+$$
+\text{TetB}: \quad \max(-v_1, -v_2, -v_3, -v_4) \leq 1
+$$
+
+Their intersection is the central octahedral region, the Field Origin. Their union is the stellated octahedron.
+
+These three elements, a tetrad, its dual, and the coupling point where they meet, are not new theoretical postulates. They are implicit in every tetrad-based formulation of bimetric gravity. What has not previously been extracted is the consequence of their combinatorial geometry.
+
+Figure 1 shows the result of evaluating these half-space inequalities at four million randomly sampled points in local frame coordinates. No mesh is constructed; the geometry emerges from the boundaries alone. On each face of TetA, the penetration by TetB's opposing vertex subdivides the surface into four sub-regions: three spatial corners and one central inverted core. This $3 + 1$ subdivision, repeated across all four faces, produces exactly $4 \times 4 = 16$ independent boundary channels. The channel count is visible in the figure before it is proven in the derivation.
+
+Eight vertices, four per tetrahedron, split by binary parity into two groups of four. Twelve edges, six per tetrahedron, all the same length, forming the structural skeleton. Eight triangular faces, four per chamber, defining the chamber geometry. Four coupled faces between TetA and TetB carrying the active interaction. And at the centre, the Field Origin, where both chambers meet and all four body diagonals cross. These are the 28 geometric elements catalogued on the previous page, now assembled into one object.
 ## Why Two Chambers, Not One
 
 A single tetrahedron would satisfy the simplex theorem, four faces enclosing a volume. But a single chamber is not self consistent. Four independent lines of argument, two from textbook physics and two from the modern gravity literature, all require a second tetrahedron with opposite orientation:

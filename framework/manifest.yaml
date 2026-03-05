@@ -38,30 +38,10 @@ groups:
       - itemId: stellated_octahedron
         title: The Stellated Octahedron
         order: 10
-  - groupId: fundamental_constants
-    title: Fundamental Constants
-    path: groups/fundamental_constants
-    order: 2
-    items:
-      - itemId: fine_structure_constant_alpha
-        title: Fine Structure Constant alpha
-        order: 1
-      - itemId: electron_mass
-        title: Electron Mass
-        order: 2
-      - itemId: inverse_square_emc2_force_hierarchy
-        title: Inverse Square, E = mc^2, Force Hierarchy
-        order: 3
-      - itemId: h0_prediction
-        title: H0 Prediction
-        order: 4
-      - itemId: capstone_constants_suite
-        title: Capstone Constants Suite
-        order: 5
   - groupId: gravitation
     title: Gravitation
     path: groups/gravitation
-    order: 3
+    order: 2
     items:
       - itemId: coupling_polynomial_structural_states
         title: Coupling Polynomial and Structural States
@@ -93,6 +73,29 @@ groups:
       - itemId: action_prefactor_dictionary
         title: Action Prefactor Dictionary
         order: 10
+  - groupId: fundamental_constants
+    title: Fundamental Constants
+    path: groups/fundamental_constants
+    order: 3
+    items:
+      - itemId: fine_structure_constant_alpha
+        title: Fine Structure Constant alpha
+        order: 1
+      - itemId: electron_mass
+        title: Electron Mass
+        order: 2
+      - itemId: electron_spin
+        title: Electron Spin
+        order: 3
+      - itemId: inverse_square_emc2_force_hierarchy
+        title: Inverse Square, E = mc^2, Force Hierarchy
+        order: 4
+      - itemId: h0_prediction
+        title: H0 Prediction
+        order: 5
+      - itemId: capstone_constants_suite
+        title: Capstone Constants Suite
+        order: 6
   - groupId: matter_nuclear_physics
     title: Matter and Nuclear Physics
     path: groups/matter_nuclear_physics

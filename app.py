@@ -67,6 +67,7 @@ NAV_GROUPS = {
     "fundamental_constants": [
         "fine_structure_constant_alpha",
         "electron_mass",
+        "electron_spin",
         "inverse_square_emc2_force_hierarchy",
         "h0_prediction",
         "capstone_constants_suite",
@@ -745,17 +746,20 @@ def create_app():
             abort(404)
         return send_from_directory(images_dir, filename)
 
-    def _serve_item_image(framework_root, group_id, item_id, filename):
-        """Serve files from groups/<group>/items/<item>/images/."""
+    def _serve_item_asset(framework_root, group_id, item_id, filename):
+        """Serve files from groups/<group>/items/<item>/assets/."""
         if not _SAFE_ID_RE.match(group_id) or not _SAFE_ID_RE.match(item_id):
             abort(404)
         item_dir = _resolve_item_dir(framework_root, group_id, item_id)
         if not os.path.isdir(item_dir):
             abort(404)
-        item_images_dir = os.path.join(item_dir, "images")
-        if not os.path.isdir(item_images_dir):
+        item_assets_dir = os.path.join(item_dir, "assets")
+        if not os.path.isdir(item_assets_dir):
             abort(404)
-        return send_from_directory(item_images_dir, filename)
+        if filename.endswith(".html"):
+            return send_from_directory(item_assets_dir, filename,
+                                       mimetype="text/html")
+        return send_from_directory(item_assets_dir, filename)
 
     # ------------------------------------------------------------------
     # SEO and AI discovery
@@ -866,7 +870,7 @@ def create_app():
 
     @app.route("/framework/assets/<group_id>/<item_id>/<path:filename>")
     def framework_item_image(group_id, item_id, filename):
-        return _serve_item_image(framework_root, group_id, item_id, filename)
+        return _serve_item_asset(framework_root, group_id, item_id, filename)
 
     # ------------------------------------------------------------------
     # Page routes (versioned)
@@ -891,7 +895,7 @@ def create_app():
         fw_root = os.path.join(app.root_path, "framework-v" + version)
         if not os.path.isdir(fw_root):
             abort(404)
-        return _serve_item_image(fw_root, group_id, item_id, filename)
+        return _serve_item_asset(fw_root, group_id, item_id, filename)
 
     # ------------------------------------------------------------------
     # Content API (latest)

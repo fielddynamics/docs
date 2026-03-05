@@ -1,0 +1,492 @@
+<!--
+  fig1_dual_tetrahedral_field_chamber.html
+
+  Supplementary Figure 1 for:
+    "Gravity Field Dynamics and Bimetric Gravity: Dual Tetrahedral
+     Field Chambers as the Key to the General Parameters"
+    Stephen Nelson, Field Dynamics Research (2026)
+
+  Renders the dual tetrahedral field chamber as an interactive 3D
+  point-cloud visualisation. Four million points are sampled uniformly
+  in local frame coordinates and classified by four oriented half-space
+  inequalities (L1..L4) that define TetA, TetB, and their intersection
+  (the central octahedron, or Field Origin).
+
+  The combinatorial parameter k = 4 yields 4 coupled faces, each
+  partitioned into 4 sub-channels (3 spatial corners + 1 inverted
+  core), for a total of 16 geometric channels.
+
+  Dependencies: Three.js r128 (CDN), OrbitControls (CDN).
+  No build step required; open directly in a modern browser.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dual Tetrahedral Field Chamber</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ==============================================================
+           Theme: CSS custom properties for dark (default) and light
+           ============================================================== */
+        :root {
+            --bg: #050505;
+            --panel-bg: linear-gradient(180deg, rgba(8,12,18,0.97) 0%, rgba(10,14,22,0.97) 100%);
+            --panel-border: rgba(0,255,255,0.12);
+            --text: #e0e0e0;
+            --text-muted: #b8b8b8;
+            --text-dim: #888;
+            --text-faint: #666;
+            --heading: #00ffff;
+            --heading2: #00cccc;
+            --code-bg: rgba(0,255,255,0.06);
+            --code-color: #7fdbdb;
+            --sep: rgba(255,255,255,0.06);
+            --btn-bg: rgba(0,255,255,0.08);
+            --btn-border: rgba(0,255,255,0.2);
+            --btn-hover: rgba(0,255,255,0.18);
+            --btn-color: #00ffff;
+            --select-bg: rgba(255,255,255,0.05);
+            --select-color: #ccc;
+            --select-border: rgba(255,255,255,0.1);
+            --label-color: #999;
+            --scroll-thumb: rgba(255,255,255,0.10);
+            --scroll-hover: rgba(255,255,255,0.18);
+        }
+
+        body.light {
+            --bg: #ffffff;
+            --panel-bg: linear-gradient(180deg, rgba(240,242,245,0.98) 0%, rgba(235,237,240,0.98) 100%);
+            --panel-border: rgba(0,120,140,0.15);
+            --text: #1a1a1a;
+            --text-muted: #444;
+            --text-dim: #666;
+            --text-faint: #888;
+            --heading: #007a8a;
+            --heading2: #00838f;
+            --code-bg: rgba(0,130,150,0.08);
+            --code-color: #006570;
+            --sep: rgba(0,0,0,0.08);
+            --btn-bg: rgba(0,130,150,0.08);
+            --btn-border: rgba(0,130,150,0.25);
+            --btn-hover: rgba(0,130,150,0.16);
+            --btn-color: #007a8a;
+            --select-bg: rgba(0,0,0,0.04);
+            --select-color: #333;
+            --select-border: rgba(0,0,0,0.12);
+            --label-color: #666;
+            --scroll-thumb: rgba(0,0,0,0.12);
+            --scroll-hover: rgba(0,0,0,0.22);
+        }
+
+        body {
+            overflow: hidden;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            transition: background-color 0.35s;
+        }
+
+        /* ---- thin scrollbar for the info panel ---- */
+        #panel::-webkit-scrollbar { width: 8px; }
+        #panel::-webkit-scrollbar-track { background: transparent; }
+        #panel::-webkit-scrollbar-thumb {
+            background: var(--scroll-thumb);
+            border-radius: 4px;
+        }
+        #panel::-webkit-scrollbar-thumb:hover { background: var(--scroll-hover); }
+
+        /* ---- slide-out panel ---- */
+        #panel {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scroll-thumb) transparent;
+            position: fixed; top: 0; left: 0; height: 100%;
+            width: 340px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--panel-border);
+            transform: translateX(-340px);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        background 0.35s, border-color 0.35s;
+            z-index: 100;
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+        }
+        #panel.open { transform: translateX(0); }
+
+        #panel-inner { padding: 28px 24px 24px 24px; flex: 1; }
+
+        #panel h1 {
+            font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px;
+            color: var(--heading); margin-bottom: 4px; line-height: 1.35;
+            transition: color 0.35s;
+        }
+        #panel .subtitle {
+            font-size: 0.72rem; color: var(--text-dim);
+            font-family: 'Consolas', 'Courier New', monospace;
+            margin-bottom: 20px; letter-spacing: 0.3px;
+            transition: color 0.35s;
+        }
+
+        #panel .sep {
+            height: 1px; background: var(--sep); margin: 16px 0;
+            transition: background 0.35s;
+        }
+
+        #panel h2 {
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--heading2); margin-bottom: 10px;
+            transition: color 0.35s;
+        }
+
+        #panel p, #panel li {
+            font-size: 0.78rem; line-height: 1.6; color: var(--text-muted);
+            transition: color 0.35s;
+        }
+        #panel ul { padding-left: 16px; margin-bottom: 0; }
+        #panel li { margin-bottom: 5px; }
+        #panel li code, #panel p code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background: var(--code-bg); color: var(--code-color);
+            padding: 1px 5px; border-radius: 3px; font-size: 0.74rem;
+            transition: background 0.35s, color 0.35s;
+        }
+
+        .color-chip {
+            display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+            vertical-align: middle; margin-right: 4px;
+        }
+
+        #panel .note {
+            font-size: 0.7rem; color: var(--text-faint); font-style: italic;
+            line-height: 1.55; margin-top: 14px;
+            transition: color 0.35s;
+        }
+
+        /* controls row inside panel */
+        #panel label {
+            font-size: 0.72rem; color: var(--label-color); display: block;
+            margin-bottom: 5px; text-transform: uppercase;
+            letter-spacing: 0.8px; font-weight: 600;
+            transition: color 0.35s;
+        }
+        #panel select {
+            width: 100%; padding: 6px 8px; font-size: 0.78rem;
+            background: var(--select-bg); color: var(--select-color);
+            border: 1px solid var(--select-border); border-radius: 4px;
+            outline: none; cursor: pointer;
+            transition: background 0.35s, color 0.35s, border-color 0.35s;
+        }
+        #panel select:hover { border-color: var(--btn-border); }
+
+        /* ---- fixed buttons (top-left) ---- */
+        .top-btn {
+            position: fixed; top: 14px;
+            width: 36px; height: 36px;
+            background: var(--btn-bg); border: 1px solid var(--btn-border);
+            border-radius: 6px; color: var(--btn-color); font-size: 1.1rem;
+            cursor: pointer; z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.35s, color 0.35s;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        }
+        .top-btn:hover { background: var(--btn-hover); }
+
+        #toggle-btn { left: 14px; }
+        #toggle-btn.shifted { left: 358px; }
+
+        #theme-btn { left: 58px; font-size: 0.95rem; }
+        #theme-btn.shifted { left: 402px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <!-- Fixed top-left buttons -->
+    <button id="toggle-btn" class="top-btn" aria-label="Toggle info panel">&#9776;</button>
+    <button id="theme-btn" class="top-btn" aria-label="Toggle light/dark theme">&#9788;</button>
+
+    <!-- Slide-out info panel -->
+    <div id="panel">
+        <div id="panel-inner">
+            <h1>Dual Tetrahedral Field Chamber</h1>
+            <div class="subtitle">Supplementary Figure 1</div>
+
+            <div class="sep"></div>
+
+            <h2>Construction</h2>
+            <p>
+                A stellated octahedron defined by two dual tetrahedra
+                (TetA, TetB) inscribed in a cube. The field node has
+                combinatorial parameter <code>k = 4</code>: four coupled
+                faces, each partitioned into four sub-channels
+                (3 spatial corners + 1 inverted core), giving
+                <code>4 x 4 = 16</code> geometric channels.
+            </p>
+
+            <div class="sep"></div>
+
+            <h2>Half-space inequalities</h2>
+            <p>Four oriented planes partition local frame space:</p>
+            <ul>
+                <li><code>L1 = x + y + z</code></li>
+                <li><code>L2 = x - y - z</code></li>
+                <li><code>L3 = -x + y - z</code></li>
+                <li><code>L4 = -x - y + z</code></li>
+            </ul>
+            <p style="margin-top:8px;">
+                <b>TetA</b>: <code>L_i &ge; -1</code> for all <code>i</code><br>
+                <b>TetB</b>: <code>L_i &le; +1</code> for all <code>i</code><br>
+                <b>Field Origin</b> (octahedron): intersection TetA &cap; TetB
+            </p>
+
+            <div class="sep"></div>
+
+            <h2>Colour key</h2>
+            <ul>
+                <li><span class="color-chip" style="background:#00ffff;"></span> <b>Cyan</b> -- TetA exposed faces (3 corners per face)</li>
+                <li><span class="color-chip" style="background:#ffc800;"></span> <b>Gold</b> -- Inverted core (TetB piercing TetA face)</li>
+                <li><span class="color-chip" style="background:#ff1a1a;"></span> <b>Red</b> -- TetB exposed faces</li>
+            </ul>
+
+            <div class="sep"></div>
+
+            <h2>Resolution</h2>
+            <label for="res-select">Point cloud density</label>
+            <select id="res-select">
+                <option value="250000">Low (250 k points)</option>
+                <option value="1000000">Medium (1 M points)</option>
+                <option value="2000000">High (2 M points)</option>
+                <option value="4000000" selected>Full (4 M points)</option>
+                <option value="8000000">Ultra (8 M points)</option>
+            </select>
+
+            <div class="sep"></div>
+
+            <p class="note">
+                This visualisation is not a fit to observational data.
+                It renders the exact half-space boundaries that define
+                the dual tetrahedral topology derived in the paper.
+                Four million points are sampled uniformly and classified
+                by the inequalities above.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ==================================================================
+        //  UI: collapsible info panel
+        // ==================================================================
+        const panel = document.getElementById('panel');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const themeBtn = document.getElementById('theme-btn');
+
+        toggleBtn.addEventListener('click', () => {
+            panel.classList.toggle('open');
+            toggleBtn.classList.toggle('shifted');
+            themeBtn.classList.toggle('shifted');
+        });
+
+        // ==================================================================
+        //  Scene, camera, renderer
+        // ==================================================================
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            45, window.innerWidth / window.innerHeight, 0.1, 1000
+        );
+        camera.position.set(0, 0, 6);
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // ==================================================================
+        //  Point cloud generation
+        //  4 million points sampled uniformly in a cube of side 3.2,
+        //  centered at the origin. This is the raw spatial sample that
+        //  the vertex shader classifies into geometric regions.
+        // ==================================================================
+        const MAX_PARTICLES = 8000000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(MAX_PARTICLES * 3);
+
+        for (let i = 0; i < MAX_PARTICLES; i++) {
+            positions[i * 3]     = (Math.random() - 0.5) * 3.2;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 3.2;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 3.2;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        // ==================================================================
+        //  Boundary-detection shader
+        //
+        //  Vertex shader: classifies each point by evaluating the four
+        //  half-space linear forms L1..L4 that define the dual tetrahedra.
+        //
+        //    TetA boundary:  max(L1, L2, L3, L4) = 1
+        //    TetB boundary:  max(-L1, -L2, -L3, -L4) = 1
+        //
+        //  Points within a thin shell ("crust") of a boundary surface
+        //  are colour-coded by their topological region:
+        //
+        //    Cyan   -- TetA face, outside TetB  (3 spatial corners)
+        //    Gold   -- TetA face, inside TetB   (inverted core)
+        //    Red    -- TetB face, outside TetA  (TetB protrusions)
+        //    Orange -- interior of both (Field Origin / octahedron)
+        //    Blue   -- interior of TetA only (ghostly volume)
+        //    Dark red -- interior of TetB only (ghostly volume)
+        //
+        //  The uniform uBlending flag switches between additive blending
+        //  colours (dark mode) and opaque colours (light mode).
+        //
+        //  Fragment shader: renders each point as a soft radial sprite.
+        // ==================================================================
+        const nodeMaterial = new THREE.ShaderMaterial({
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            uniforms: {
+                uLightMode: { value: 0.0 }
+            },
+            vertexShader: `
+                uniform float uLightMode;
+                varying vec3 vColor;
+                varying float vAlpha;
+
+                void main() {
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_Position = projectionMatrix * mvPosition;
+                    gl_PointSize = 12.0 / -mvPosition.z;
+
+                    // The four oriented half-space linear forms (Eq. 1 in paper)
+                    float v1 = position.x + position.y + position.z;   // L1
+                    float v2 = position.x - position.y - position.z;   // L2
+                    float v3 = -position.x + position.y - position.z;  // L3
+                    float v4 = -position.x - position.y + position.z;  // L4
+
+                    // TetA: max(L_i) <= 1;  TetB: max(-L_i) <= 1
+                    float tetA = max(max(v1, v2), max(v3, v4));
+                    float tetB = max(max(-v1, -v2), max(-v3, -v4));
+
+                    // Boundary shell thickness for surface detection
+                    float crust = 0.04;
+                    bool onFaceA = abs(tetA - 1.0) < crust;
+                    bool onFaceB = abs(tetB - 1.0) < crust;
+
+                    vAlpha = 0.0;  // default: invisible (exterior)
+
+                    // Region 1: TetA face exposed beyond TetB (3 corners per face)
+                    if (onFaceA && tetB > 1.0 && tetA <= 1.0 + crust) {
+                        vColor = mix(vec3(0.0, 1.0, 1.0), vec3(0.0, 0.65, 0.72), uLightMode);
+                        vAlpha = 0.9;
+                    }
+                    // Region 2: TetA face where TetB pierces through (inverted core)
+                    else if (onFaceA && tetB <= 1.0) {
+                        vColor = mix(vec3(1.0, 0.8, 0.0), vec3(0.82, 0.58, 0.0), uLightMode);
+                        vAlpha = 1.0;
+                    }
+                    // Region 3: TetB face protruding beyond TetA
+                    else if (onFaceB && tetA > 1.0 && tetB <= 1.0 + crust) {
+                        vColor = mix(vec3(1.0, 0.1, 0.1), vec3(0.82, 0.1, 0.1), uLightMode);
+                        vAlpha = 0.9;
+                    }
+                    // Region 4: Field Origin (shared octahedron interior)
+                    else if (tetA <= 1.0 && tetB <= 1.0) {
+                        vColor = mix(vec3(1.0, 0.5, 0.0), vec3(0.8, 0.4, 0.0), uLightMode);
+                        vAlpha = mix(0.08, 0.12, uLightMode);
+                    }
+                    // Region 5: TetA interior only (ghostly fill)
+                    else if (tetA <= 1.0) {
+                        vColor = mix(vec3(0.0, 0.4, 0.8), vec3(0.0, 0.3, 0.65), uLightMode);
+                        vAlpha = mix(0.02, 0.04, uLightMode);
+                    }
+                    // Region 6: TetB interior only (ghostly fill)
+                    else if (tetB <= 1.0) {
+                        vColor = mix(vec3(0.6, 0.0, 0.0), vec3(0.5, 0.0, 0.0), uLightMode);
+                        vAlpha = mix(0.02, 0.04, uLightMode);
+                    }
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                varying float vAlpha;
+                void main() {
+                    if (vAlpha == 0.0) discard;   // exterior point
+
+                    // Soft radial falloff for volumetric appearance
+                    vec2 xy = gl_PointCoord.xy - vec2(0.5);
+                    float ll = length(xy);
+                    if (ll > 0.5) discard;        // clip to circle
+
+                    float alpha = pow((0.5 - ll) * 2.0, 1.5) * vAlpha;
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `
+        });
+
+        const pointCloud = new THREE.Points(geometry, nodeMaterial);
+        scene.add(pointCloud);
+
+        // Default to full resolution (all 4M points rendered)
+        geometry.setDrawRange(0, MAX_PARTICLES);
+
+        // ==================================================================
+        //  UI: resolution selector (adjusts draw range without reallocating)
+        // ==================================================================
+        document.getElementById('res-select').addEventListener('change', function () {
+            geometry.setDrawRange(0, parseInt(this.value));
+        });
+
+        // ==================================================================
+        //  UI: dark / light theme toggle
+        //  Swaps scene background, blending mode, and shader uniforms.
+        //  Additive blending is used on dark backgrounds; normal blending
+        //  on light backgrounds (additive would wash out to white).
+        // ==================================================================
+        let isDark = true;
+        const darkBg = new THREE.Color(0x050505);
+        const lightBg = new THREE.Color(0xffffff);
+
+        themeBtn.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.classList.toggle('light', !isDark);
+            themeBtn.innerHTML = isDark ? '&#9788;' : '&#9790;';
+
+            scene.background = isDark ? null : lightBg;
+            renderer.setClearColor(isDark ? darkBg : lightBg);
+            nodeMaterial.blending = isDark ? THREE.AdditiveBlending : THREE.NormalBlending;
+            nodeMaterial.uniforms.uLightMode.value = isDark ? 0.0 : 1.0;
+            nodeMaterial.needsUpdate = true;
+        });
+
+        // ==================================================================
+        //  Render loop with slow auto-rotation
+        // ==================================================================
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            pointCloud.rotation.y += 0.003;
+            pointCloud.rotation.x += 0.002;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

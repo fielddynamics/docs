@@ -70,6 +70,50 @@ G = \left(\frac{17}{13}\right)\alpha^{21}\frac{\hbar c}{m_e^2},
 $$
 
 a formula in which every number is a reading of the stellated octahedron.
+## The Polynomial Was Already Written Down
+
+There is an equation that every student of general relativity learns in their first year of graduate school. It is not controversial. It is not speculative. It appears in every textbook on tetrad gravity, from Misner, Thorne and Wheeler (1973) to Carroll (2004) to Rovelli (2004). The equation is:
+
+$$
+g_{\mu\nu} = \eta_{ab} \, e^a_\mu \, e^b_\nu
+$$
+
+It says: the metric of spacetime is built from three ingredients. A flat reference metric $\eta_{ab}$, which encodes how directions couple. A tetrad field $e^a_\mu$, which provides the local frame, the four legs that span the tangent space at each point. And a non-degeneracy condition, $\det(e) \neq 0$, which guarantees that the tetrad actually spans. Without it, the metric is singular. Spacetime fails.
+
+For a century, this equation has been treated as a definition. A way to rewrite the metric in terms of tetrads. A change of variables. You learn it, you use it, you move on.
+
+But look at what the equation contains.
+
+**The non-degeneracy condition.** One constraint: $\det(e) \neq 0$. The field either closes or it does not. This is binary. It contributes one structural element.
+
+That is $k^0 = 1$.
+
+**The tetrad.** Four legs: $e^a_\mu$ where $a$ runs from 0 to 3. One leg for time, three for space. Four independent directions that span the tangent space. This is the frame, the structure that tells you which directions exist at each point.
+
+That is $k^1 = K = 4$.
+
+**The flat metric.** $\eta_{ab}$ carries two indices, each running from 0 to 3. It is a $K \times K$ matrix, 16 components that encode how every direction couples to every other direction. In flat spacetime, most of these are zero (the off-diagonal entries vanish). In curved spacetime, the full metric $g_{\mu\nu}$ fills all 16 slots. The flat metric is the template; the connection structure has $K^2 = 16$ slots available.
+
+That is $k^2 = K^2 = 16$.
+
+Now count the structural types. Not the components, every relativist counts components. Count the *types of structure* present in the equation:
+
+$$
+1 + K + K^2 = 1 + 4 + 16 = 21
+$$
+
+That is the coupling polynomial.
+
+The tetrad equation of general relativity, written down by Einstein in 1928 and used by every gravitational physicist since, contains exactly three structural types: a constraint, a frame, and a connection. Their count is $1 + K + K^2$. The coupling polynomial is not imported into gravity from outside. It is the structural content of the equation that *defines* the gravitational field in the tetrad formalism.
+
+No one noticed because no one was counting types. The standard question is: how many independent components does $g_{\mu\nu}$ have? The answer is 10 (a symmetric $4 \times 4$ matrix). That is the right answer to that question. But it is the answer to a different question than the one the coupling polynomial asks.
+
+The polynomial asks: how many *levels of structure* does the gravitational field traverse to achieve complete coupling? One level for existence. One level for the frame. One level for the connection. Three levels, with $1$, $K$, and $K^2$ elements respectively. The total depth is 21.
+
+This is why the polynomial has exactly three terms. The boundary of a tetrahedron has three types of geometric cell: vertices (zero-dimensional, $k^0$), edges (one-dimensional, $k^1$), and faces (two-dimensional, $k^2$). There is no three-dimensional cell on the boundary of a three-dimensional object. The tetrad equation has three types of structure for the same reason the tetrahedron has three types of boundary element. Both are descriptions of closure in $D = 3$ spatial dimensions.
+
+The polynomial was always there. It was written in 1928 as $g_{\mu\nu} = \eta_{ab} \, e^a_\mu \, e^b_\nu$. It took a century to read it as $1 + K + K^2$.
+
 ## What You Now Have
 
 One polynomial. Three structural states. Three integers. From here, the next pages derive the gravitational constant, the constitutive law, the covariant action, and resulting predictions, all from $f(K, s) = 1 + sK + K^2$ and two integers $K = 4$, $D = 3$. The geometry was built in Foundations. The polynomial reads it. Everything that follows is reading.

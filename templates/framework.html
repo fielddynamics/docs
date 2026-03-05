@@ -347,15 +347,6 @@
                                     <a class="framework-nav-link" href="#">The Stellated Octahedron</a>
                                 </div>
 
-                                <div class="framework-nav-group" data-group-id="fundamental_constants">
-                                    <h3 class="framework-nav-heading">Fundamental Constants</h3>
-                                    <a class="framework-nav-link" href="#">Fine Structure Constant &alpha;</a>
-                                    <a class="framework-nav-link" href="#">Electron Mass</a>
-                                    <a class="framework-nav-link" href="#">Mass-Energy Equivalence</a>
-                                    <a class="framework-nav-link" href="#">H0 Prediction</a>
-                                    <a class="framework-nav-link" href="#">Capstone Constants Suite</a>
-                                </div>
-
                                 <div class="framework-nav-group" data-group-id="gravitation">
                                     <h3 class="framework-nav-heading">Gravitation</h3>
                                     <a class="framework-nav-link" href="#">Coupling Polynomial and Structural States</a>
@@ -368,6 +359,16 @@
                                     <a class="framework-nav-link" href="#">Lensing and Time Delay</a>
                                     <a class="framework-nav-link" href="#">Thermodynamic Relations</a>
                                     <a class="framework-nav-link" href="#">Action Prefactor Dictionary</a>
+                                </div>
+
+                                <div class="framework-nav-group" data-group-id="fundamental_constants">
+                                    <h3 class="framework-nav-heading">Fundamental Constants</h3>
+                                    <a class="framework-nav-link" href="#">Fine Structure Constant &alpha;</a>
+                                    <a class="framework-nav-link" href="#">Electron Mass</a>
+                                    <a class="framework-nav-link" href="#">Electron Spin</a>
+                                    <a class="framework-nav-link" href="#">Mass-Energy Equivalence</a>
+                                    <a class="framework-nav-link" href="#">H0 Prediction</a>
+                                    <a class="framework-nav-link" href="#">Capstone Constants Suite</a>
                                 </div>
                             </div>
                         </section>
@@ -624,6 +625,14 @@
                 'twenty_eight_geometric_elements',
                 'stellated_octahedron'
             ],
+            fundamental_constants: [
+                'fine_structure_constant_alpha',
+                'electron_mass',
+                'electron_spin',
+                'inverse_square_emc2_force_hierarchy',
+                'h0_prediction',
+                'capstone_constants_suite'
+            ],
             gravitation: [
                 'coupling_polynomial_structural_states',
                 'g_from_topology',
@@ -635,13 +644,6 @@
                 'lensing_time_delay',
                 'thermodynamic_relations',
                 'action_prefactor_dictionary'
-            ],
-            fundamental_constants: [
-                'fine_structure_constant_alpha',
-                'electron_mass',
-                'inverse_square_emc2_force_hierarchy',
-                'h0_prediction',
-                'capstone_constants_suite'
             ],
             matter_nuclear_physics: [
                 'nuclear_synthesis_bridge',
@@ -776,6 +778,63 @@
 
             runKatexOn(targetEl);
             scheduleMathRefresh();
+        }
+
+        var INTERACTIVE_RE = /\[interactive:([^\]]+)\]/;
+
+        function processFigureViewers(containerEl) {
+            if (!containerEl) return;
+            var imgs = containerEl.querySelectorAll('img');
+            for (var i = 0; i < imgs.length; i++) {
+                var img = imgs[i];
+                var alt = img.getAttribute('alt') || '';
+                var match = INTERACTIVE_RE.exec(alt);
+                if (!match) continue;
+
+                var htmlFile = match[1];
+                var cleanAlt = alt.replace(INTERACTIVE_RE, '').replace(/\s+$/, '');
+                img.setAttribute('alt', cleanAlt);
+
+                var src = img.getAttribute('src') || '';
+                var assetBase = src.substring(0, src.lastIndexOf('/') + 1);
+                var iframeSrc = assetBase + htmlFile;
+
+                var viewer = document.createElement('div');
+                viewer.className = 'figure-viewer';
+
+                var btn = document.createElement('button');
+                btn.className = 'figure-viewer-toggle';
+                btn.innerHTML = '<span class="figure-viewer-icon"></span> Open Interactive View';
+
+                var iframeWrap = document.createElement('div');
+                iframeWrap.className = 'figure-viewer-iframe-wrap';
+
+                img.parentNode.insertBefore(viewer, img);
+                viewer.appendChild(img);
+                viewer.appendChild(btn);
+                viewer.appendChild(iframeWrap);
+
+                (function (b, w, url) {
+                    b.addEventListener('click', function () {
+                        var isOpen = w.classList.contains('open');
+                        if (isOpen) {
+                            w.innerHTML = '';
+                            w.classList.remove('open');
+                            b.classList.remove('active');
+                            b.innerHTML = '<span class="figure-viewer-icon"></span> Open Interactive View';
+                        } else {
+                            var iframe = document.createElement('iframe');
+                            iframe.className = 'figure-viewer-iframe';
+                            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                            iframe.src = url;
+                            w.appendChild(iframe);
+                            w.classList.add('open');
+                            b.classList.add('active');
+                            b.innerHTML = '<span class="figure-viewer-icon"></span> Close Interactive View';
+                        }
+                    });
+                })(btn, iframeWrap, iframeSrc);
+            }
         }
 
         function buildDocUrl(groupId, itemId, docKind) {
@@ -1393,10 +1452,12 @@
             try {
                 if (hasSSR) {
                     runKatexOn(contentByTab.overview);
+                    processFigureViewers(contentByTab.overview);
                     contentByTab.overview.removeAttribute('data-ssr');
                 } else {
                     var overviewDoc = await fetchDoc(groupId, itemId, 'overview');
                     renderMarkdown(contentByTab.overview, overviewDoc);
+                    processFigureViewers(contentByTab.overview);
                 }
 
                 if (tabVisibility.examples) {
