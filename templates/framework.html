@@ -281,12 +281,31 @@
         .validation-copy-label {
             white-space: nowrap;
         }
+        .api-demo-run-btn {
+            padding: 5px 20px;
+            background: #1a3a5a;
+            color: #88bbdd;
+            border: 1px solid #2a5a7a;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-family: inherit;
+            border-radius: 3px;
+            transition: background 0.15s;
+        }
+        .api-demo-run-btn:hover {
+            background: #1f4a6a;
+        }
+        .api-demo-run-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github-dark.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     {% if ssr_content_html %}
     <script type="application/ld+json">
     {
@@ -350,8 +369,9 @@
                                 <div class="framework-nav-group" data-group-id="gravitation">
                                     <h3 class="framework-nav-heading">Gravitation</h3>
                                     <a class="framework-nav-link" href="#">Coupling Polynomial and Structural States</a>
-                                    <a class="framework-nav-link" href="#">G from Topology</a>
+                                    <a class="framework-nav-link" href="#">The Field Equation</a>
                                     <a class="framework-nav-link" href="#">Constitutive Law &mu;(x)</a>
+                                    <a class="framework-nav-link" href="#">G from Topology</a>
                                     <a class="framework-nav-link" href="#">Poisson Equation and Scale Invariance</a>
                                     <a class="framework-nav-link" href="#">Covariant Completion</a>
                                     <a class="framework-nav-link" href="#">Bimetric Locking</a>
@@ -441,6 +461,42 @@
                                 </div>
                             </div>
                         </section>
+
+                        <section class="framework-nav-accordion-item" data-accordion-id="api_reference">
+                            <button class="framework-nav-accordion-toggle" type="button" aria-expanded="false" aria-controls="framework-accordion-panel-api_reference">
+                                <span class="framework-nav-accordion-title">API REFERENCE</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                            <div class="framework-nav-accordion-panel" id="framework-accordion-panel-api_reference" hidden>
+                                <div class="framework-nav-group" data-group-id="api_reference">
+                                    <a class="framework-nav-link" href="#">Rotation Curves</a>
+                                    <a class="framework-nav-link" href="#">Galaxy Catalog</a>
+                                    <a class="framework-nav-link" href="#">Cosmology</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="framework-nav-accordion-item" data-accordion-id="galactic_dynamics">
+                            <button class="framework-nav-accordion-toggle" type="button" aria-expanded="false" aria-controls="framework-accordion-panel-galactic_dynamics">
+                                <span class="framework-nav-accordion-title">GALACTIC DYNAMICS</span>
+                                <span class="framework-nav-accordion-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </span>
+                            </button>
+                            <div class="framework-nav-accordion-panel" id="framework-accordion-panel-galactic_dynamics" hidden>
+                                <div class="framework-nav-group" data-group-id="galactic_dynamics">
+                                    <a class="framework-nav-link" href="#">Rotation Curves</a>
+                                    <a class="framework-nav-link" href="#">Decoded Velocity to Effective Mass</a>
+                                    <a class="framework-nav-link" href="#">Radial Acceleration Relation</a>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </nav>
             </aside>
@@ -458,6 +514,7 @@
                     <h1 class="framework-title">{% if ssr_title %}{{ ssr_title }}{% else %}Field Dynamics Framework{% endif %}</h1>
                     <div class="framework-main-tabs" role="tablist" aria-label="Framework content tabs">
                         <button class="framework-main-tab active" data-tab-id="overview" role="tab" aria-selected="true">Overview</button>
+                        <button class="framework-main-tab" data-tab-id="derivation" role="tab" aria-selected="false">Derivation</button>
                         <button class="framework-main-tab" data-tab-id="examples" role="tab" aria-selected="false">Examples</button>
                         <button class="framework-main-tab" data-tab-id="validation" role="tab" aria-selected="false">Validation</button>
                     </div>
@@ -466,6 +523,10 @@
                         <div class="framework-main-content">
                             <article class="framework-tab-panel active" data-tab-content="overview">
                                 <div id="framework-overview-content" class="framework-markdown"{% if ssr_content_html %} data-ssr="true"{% endif %}>{% if ssr_content_html %}{{ ssr_content_html|safe }}{% else %}Loading overview...{% endif %}</div>
+                            </article>
+
+                            <article class="framework-tab-panel" data-tab-content="derivation" style="display: none;">
+                                <div id="framework-derivation-content" class="framework-markdown">Select an item to load derivation.</div>
                             </article>
 
                             <article class="framework-tab-panel" data-tab-content="examples" style="display: none;">
@@ -635,8 +696,9 @@
             ],
             gravitation: [
                 'coupling_polynomial_structural_states',
-                'g_from_topology',
+                'field_equation',
                 'constitutive_law_mu_x',
+                'g_from_topology',
                 'poisson_scale_invariance',
                 'covariant_completion',
                 'bimetric_locking',
@@ -673,6 +735,16 @@
                 'nucleosynthesis_tensions',
                 'cmb_constraints',
                 'structure_growth'
+            ],
+            api_reference: [
+                'api_rotation_curves',
+                'api_galaxy_catalog',
+                'api_cosmology'
+            ],
+            galactic_dynamics: [
+                'rotation_curves',
+                'decoded_velocity_to_effective_mass',
+                'radial_acceleration_relation'
             ]
         };
 
@@ -700,7 +772,9 @@
             gauge_particle_physics: 'applications',
             quantum_theory: 'applications',
             cosmology: 'applications',
-            engine: 'engine'
+            engine: 'engine',
+            api_reference: 'api_reference',
+            galactic_dynamics: 'galactic_dynamics'
         };
         var accordionItems = document.querySelectorAll('.framework-nav-accordion-item[data-accordion-id]');
         var currentOpenAccordionId = null;
@@ -752,6 +826,7 @@
 
         var contentByTab = {
             overview: document.getElementById('framework-overview-content'),
+            derivation: document.getElementById('framework-derivation-content'),
             examples: document.getElementById('framework-examples-content'),
             validation: document.getElementById('framework-validation-content')
         };
@@ -796,8 +871,8 @@
                 img.setAttribute('alt', cleanAlt);
 
                 var src = img.getAttribute('src') || '';
-                var assetBase = src.substring(0, src.lastIndexOf('/') + 1);
-                var iframeSrc = assetBase + htmlFile;
+                var iframeSrc = src.replace('/assets/', '/interactive/');
+                iframeSrc = iframeSrc.substring(0, iframeSrc.lastIndexOf('/') + 1) + htmlFile;
 
                 var viewer = document.createElement('div');
                 viewer.className = 'figure-viewer';
@@ -825,7 +900,7 @@
                         } else {
                             var iframe = document.createElement('iframe');
                             iframe.className = 'figure-viewer-iframe';
-                            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                            iframe.setAttribute('sandbox', 'allow-scripts');
                             iframe.src = url;
                             w.appendChild(iframe);
                             w.classList.add('open');
@@ -835,6 +910,1089 @@
                     });
                 })(btn, iframeWrap, iframeSrc);
             }
+        }
+
+        var _apiDemoCharts = {};
+        var _apiDemoColors = {
+            gfd:       '#00ff9d',
+            mond:      '#ff6b35',
+            newtonian: 'rgba(160,180,200,0.55)',
+            cdm:       '#a78bfa'
+        };
+
+        function initApiDemos(containerEl) {
+            if (!containerEl) return;
+            highlightCodeBlocks(containerEl);
+
+            var rcExplorers = containerEl.querySelectorAll('.rc-explorer');
+            rcExplorers.forEach(function (el) { initRcExplorer(el); });
+
+            var sections = containerEl.querySelectorAll('.api-demo-section');
+            if (!sections.length) return;
+
+            sections.forEach(function (section) {
+                var btn = section.querySelector('.api-demo-run-btn');
+                var timeBadge = section.querySelector('.api-demo-time');
+                var endpoint = resolveApiUrl(section.getAttribute('data-endpoint'));
+                var method = (section.getAttribute('data-method') || 'POST').toUpperCase();
+                var isCatalog = section.classList.contains('api-demo-catalog');
+
+                if (!btn) return;
+
+                btn.addEventListener('click', function () {
+                    btn.disabled = true;
+                    btn.textContent = 'Running...';
+                    timeBadge.textContent = '';
+
+                    var t0 = performance.now();
+                    var fetchOpts = { method: method, headers: {} };
+                    if (method === 'POST') {
+                        var body = section.getAttribute('data-body');
+                        fetchOpts.headers['Content-Type'] = 'application/json';
+                        fetchOpts.body = body;
+                    }
+
+                    fetch(endpoint, fetchOpts)
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        var elapsed = Math.round(performance.now() - t0);
+                        timeBadge.textContent = elapsed + ' ms';
+                        btn.textContent = 'Run';
+                        btn.disabled = false;
+
+                        if (isCatalog) {
+                            renderApiDemoCatalog(section, data);
+                        } else {
+                            var chartWrap = section.querySelector('.api-demo-chart-wrap');
+                            var canvas = section.querySelector('.api-demo-canvas');
+                            if (chartWrap) chartWrap.style.display = 'block';
+                            var chartType = section.getAttribute('data-chart-type');
+                            if (chartType === 'tully-fisher' && canvas) {
+                                renderTullyFisherChart(endpoint, canvas, data);
+                            } else if (chartType === 'hubble-constant' && canvas) {
+                                renderHubbleConstantChart(endpoint, canvas, data);
+                            } else if (canvas) {
+                                renderApiDemoChart(endpoint, canvas, data);
+                            }
+                        }
+                    })
+                    .catch(function (err) {
+                        timeBadge.textContent = 'Error: ' + err.message;
+                        btn.textContent = 'Run';
+                        btn.disabled = false;
+                    });
+                });
+            });
+        }
+
+        function renderApiDemoCatalog(section, data) {
+            var tableWrap = section.querySelector('.api-demo-table-wrap');
+            if (!tableWrap) return;
+            tableWrap.style.display = 'block';
+
+            var titleEl = section.querySelector('.api-demo-table-title');
+            if (titleEl && data.name) {
+                titleEl.textContent = data.name +
+                    (data.distance_mpc ? '  |  ' + data.distance_mpc + ' Mpc' : '') +
+                    (data.points ? '  |  ' + data.points + ' points' : '');
+            }
+
+            var metaKeys = [
+                'hubble_type', 'distance_mpc', 'inclination_deg',
+                'luminosity_3_6um', 'disk_scale_length_kpc',
+                'hi_mass_1e9_msun', 'v_flat_km_s', 'quality'
+            ];
+            var metaLabels = {
+                hubble_type: 'Hubble type',
+                distance_mpc: 'Distance (Mpc)',
+                inclination_deg: 'Inclination (deg)',
+                luminosity_3_6um: 'L_3.6 (10^9 L_sun)',
+                disk_scale_length_kpc: 'Disk scale (kpc)',
+                hi_mass_1e9_msun: 'HI mass (10^9 M_sun)',
+                v_flat_km_s: 'v_flat (km/s)',
+                quality: 'Quality'
+            };
+
+            var metaTable = section.querySelector('.api-demo-meta-table');
+            if (metaTable) {
+                var headTr = metaTable.querySelector('thead tr');
+                var bodyTr = metaTable.querySelector('tbody tr');
+                headTr.innerHTML = '';
+                bodyTr.innerHTML = '';
+                metaKeys.forEach(function (k) {
+                    if (data[k] == null) return;
+                    var th = document.createElement('th');
+                    th.textContent = metaLabels[k] || k;
+                    headTr.appendChild(th);
+                    var td = document.createElement('td');
+                    td.textContent = data[k];
+                    bodyTr.appendChild(td);
+                });
+            }
+
+            var d = data.data;
+            if (!d) return;
+            var dataCols = [
+                'radius_kpc', 'v_obs_km_s', 'e_v_obs_km_s',
+                'v_gas_km_s', 'v_disk_km_s', 'v_bul_km_s', 'sb_obs'
+            ];
+            var dataLabels = {
+                radius_kpc: 'r (kpc)',
+                v_obs_km_s: 'v_obs (km/s)',
+                e_v_obs_km_s: 'e_v (km/s)',
+                v_gas_km_s: 'v_gas (km/s)',
+                v_disk_km_s: 'v_disk (km/s)',
+                v_bul_km_s: 'v_bul (km/s)',
+                sb_obs: 'SB (L_sun/pc^2)'
+            };
+
+            var presentCols = dataCols.filter(function (c) {
+                return d[c] && d[c].length > 0;
+            });
+
+            var dataTable = section.querySelector('.api-demo-data-table');
+            if (!dataTable) return;
+            var dHead = dataTable.querySelector('thead tr');
+            var dBody = dataTable.querySelector('tbody');
+            dHead.innerHTML = '';
+            dBody.innerHTML = '';
+
+            presentCols.forEach(function (c) {
+                var th = document.createElement('th');
+                th.textContent = dataLabels[c] || c;
+                dHead.appendChild(th);
+            });
+
+            var nRows = d[presentCols[0]].length;
+            for (var i = 0; i < nRows; i++) {
+                var tr = document.createElement('tr');
+                presentCols.forEach(function (c) {
+                    var td = document.createElement('td');
+                    var val = d[c][i];
+                    td.textContent = (typeof val === 'number') ? parseFloat(val.toFixed(4)) : val;
+                    td.style.textAlign = 'right';
+                    td.style.fontFamily = 'Consolas, Monaco, "Courier New", monospace';
+                    td.style.fontSize = '0.85em';
+                    tr.appendChild(td);
+                });
+                dBody.appendChild(tr);
+            }
+        }
+
+        function renderApiDemoChart(chartKey, canvas, data) {
+            if (_apiDemoCharts[chartKey]) {
+                _apiDemoCharts[chartKey].destroy();
+            }
+
+            var obs = data.observed || {};
+            var rObs = obs.radius_kpc || [];
+            var vObs = obs.v_obs_km_s || [];
+            var eObs = obs.e_v_obs_km_s || [];
+            var results = data.results || [];
+
+            var datasets = [];
+
+            var obsData = rObs.map(function (r, i) {
+                return { x: r, y: vObs[i] };
+            });
+            datasets.push({
+                type: 'scatter',
+                label: 'Observed',
+                data: obsData,
+                borderColor: '#ffffff',
+                backgroundColor: 'rgba(255,255,255,0.85)',
+                pointRadius: 3.5,
+                pointHoverRadius: 5,
+                showLine: false
+            });
+
+            if (eObs.length === rObs.length) {
+                var errUpper = rObs.map(function (r, i) {
+                    return { x: r, y: vObs[i] + eObs[i] };
+                });
+                var errLower = rObs.map(function (r, i) {
+                    return { x: r, y: vObs[i] - eObs[i] };
+                });
+                datasets.push({
+                    type: 'line',
+                    label: 'Error upper',
+                    data: errUpper,
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: false,
+                    borderDash: [2, 2]
+                });
+                datasets.push({
+                    type: 'line',
+                    label: 'Error lower',
+                    data: errLower,
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: '-1',
+                    backgroundColor: 'rgba(255,255,255,0.04)',
+                    borderDash: [2, 2]
+                });
+            }
+
+            results.forEach(function (fw) {
+                var rFw = fw.radius_kpc || rObs;
+                var vPred = fw.v_predicted_km_s || [];
+                var fwColor = _apiDemoColors[fw.framework] || '#6ca0dc';
+                var fwData = rFw.map(function (r, i) {
+                    return { x: r, y: vPred[i] };
+                });
+                var rmsLabel = '';
+                if (fw.residuals && fw.residuals.rms_km_s != null) {
+                    rmsLabel = ' (RMS ' + fw.residuals.rms_km_s + ' km/s)';
+                }
+                datasets.push({
+                    type: 'line',
+                    label: fw.framework.toUpperCase() + rmsLabel,
+                    data: fwData,
+                    borderColor: fwColor,
+                    borderWidth: 2.2,
+                    pointRadius: rFw.length > 100 ? 0 : 2,
+                    tension: 0.2,
+                    fill: false
+                });
+            });
+
+            var vNewt = (results[0] || {}).v_newtonian_km_s;
+            var rGrid = (results[0] || {}).radius_kpc || rObs;
+            if (vNewt && vNewt.length) {
+                var newtData = rGrid.map(function (r, i) {
+                    return { x: r, y: vNewt[i] };
+                });
+                datasets.push({
+                    type: 'line',
+                    label: 'Newtonian',
+                    data: newtData,
+                    borderColor: 'rgba(160,180,200,0.4)',
+                    borderWidth: 1.2,
+                    borderDash: [4, 4],
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: false
+                });
+            }
+
+            _apiDemoCharts[chartKey] = new Chart(canvas, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                options: {
+                    animation: { duration: 300 },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#aaa',
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                pointStyle: 'line',
+                                filter: function (item) {
+                                    return item.text.indexOf('Error') === -1;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1b1b1b',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function (items) {
+                                    return 'r = ' + parseFloat(items[0].raw.x).toFixed(2) + ' kpc';
+                                },
+                                label: function (item) {
+                                    if (item.raw.y == null) return null;
+                                    return ' ' + item.dataset.label + ': ' + Number(item.raw.y).toFixed(1) + ' km/s';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Radius (kpc)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Velocity (km/s)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTullyFisherChart(chartKey, canvas, data) {
+            if (_apiDemoCharts[chartKey]) {
+                _apiDemoCharts[chartKey].destroy();
+            }
+
+            var datasets = [];
+            var gfd = data.gfd_curve || {};
+            var lcdm = data.lcdm_curve || {};
+            var obs = data.observations || [];
+            var sins = data.sins_highlight;
+
+            if (gfd.upper && gfd.lower && gfd.z) {
+                datasets.push({
+                    type: 'line',
+                    label: 'GFD band upper',
+                    data: gfd.z.map(function (z, i) { return { x: z, y: gfd.upper[i] }; }),
+                    borderColor: 'rgba(0,255,157,0.18)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: false
+                });
+                datasets.push({
+                    type: 'line',
+                    label: 'GFD band lower',
+                    data: gfd.z.map(function (z, i) { return { x: z, y: gfd.lower[i] }; }),
+                    borderColor: 'rgba(0,255,157,0.18)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: '-1',
+                    backgroundColor: 'rgba(0,255,157,0.08)'
+                });
+            }
+
+            if (gfd.z && gfd.ratio) {
+                datasets.push({
+                    type: 'line',
+                    label: 'GFD (SST derived)',
+                    data: gfd.z.map(function (z, i) { return { x: z, y: gfd.ratio[i] }; }),
+                    borderColor: '#00ff9d',
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: false
+                });
+            }
+
+            if (lcdm.z && lcdm.ratio) {
+                datasets.push({
+                    type: 'line',
+                    label: 'LCDM (no evolution)',
+                    data: lcdm.z.map(function (z, i) { return { x: z, y: lcdm.ratio[i] }; }),
+                    borderColor: 'rgba(160,180,200,0.5)',
+                    borderWidth: 1.5,
+                    borderDash: [6, 4],
+                    pointRadius: 0,
+                    tension: 0,
+                    fill: false
+                });
+            }
+
+            var surveyColors = {
+                'Local TF': '#ffffff',
+                'DEEP2/AEGIS': '#4da6ff',
+                'DEEP2': '#4da6ff',
+                'IMAGES': '#ff6b35',
+                'KMOS3D': '#a78bfa',
+                'SINS': '#ef5350',
+                'ZFIRE': '#ffa726'
+            };
+
+            obs.forEach(function (pt) {
+                var color = surveyColors[pt.survey] || '#aaaaaa';
+                datasets.push({
+                    type: 'scatter',
+                    label: pt.survey + ' (z=' + pt.z + ')',
+                    data: [{ x: pt.z, y: pt.ratio }],
+                    borderColor: color,
+                    backgroundColor: color,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                });
+                if (pt.err) {
+                    datasets.push({
+                        type: 'scatter',
+                        label: '_err_' + pt.survey + '_' + pt.z,
+                        data: [
+                            { x: pt.z, y: pt.ratio - pt.err },
+                            { x: pt.z, y: pt.ratio + pt.err }
+                        ],
+                        borderColor: color,
+                        backgroundColor: 'transparent',
+                        pointRadius: 0,
+                        showLine: true,
+                        borderWidth: 1.5
+                    });
+                }
+            });
+
+            if (sins) {
+                datasets.push({
+                    type: 'scatter',
+                    label: 'SINS BX442 (+27%)',
+                    data: [{ x: sins.z, y: sins.ratio }],
+                    borderColor: '#ef5350',
+                    backgroundColor: '#ef5350',
+                    pointRadius: 7,
+                    pointHoverRadius: 9,
+                    pointStyle: 'star'
+                });
+            }
+
+            _apiDemoCharts[chartKey] = new Chart(canvas, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                options: {
+                    animation: { duration: 300 },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#aaa',
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                filter: function (item) {
+                                    var t = item.text || '';
+                                    return t.indexOf('_err_') === -1
+                                        && t.indexOf('band') === -1;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1b1b1b',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function (items) {
+                                    return 'z = ' + parseFloat(items[0].raw.x).toFixed(2);
+                                },
+                                label: function (item) {
+                                    if (item.raw.y == null) return null;
+                                    return ' ' + item.dataset.label + ': ' + Number(item.raw.y).toFixed(3);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Redshift z', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' },
+                            min: 0
+                        },
+                        y: {
+                            title: { display: true, text: 'v(z) / v(0)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' },
+                            min: 0.8
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHubbleConstantChart(chartKey, canvas, data) {
+            if (_apiDemoCharts[chartKey]) {
+                _apiDemoCharts[chartKey].destroy();
+            }
+
+            var measurements = data.measurements || [];
+            var gfd = data.gfd || {};
+
+            var labels = measurements.map(function (m) { return m.method; });
+            labels.push('GFD');
+
+            var datasets = [];
+
+            var mData = measurements.map(function (m, i) {
+                return { x: m.h0, y: i };
+            });
+            var mColors = measurements.map(function (m) { return m.color || '#6ca0dc'; });
+            var mErrLow = measurements.map(function (m) {
+                return m.err_low || m.err || 0;
+            });
+            var mErrHigh = measurements.map(function (m) {
+                return m.err_high || m.err || 0;
+            });
+
+            datasets.push({
+                type: 'scatter',
+                label: 'Measurements',
+                data: mData,
+                backgroundColor: mColors,
+                borderColor: mColors,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            });
+
+            var errSegments = [];
+            measurements.forEach(function (m, i) {
+                var lo = m.err_low || m.err || 0;
+                var hi = m.err_high || m.err || 0;
+                errSegments.push(
+                    { x: m.h0 - lo, y: i },
+                    { x: m.h0 + hi, y: i },
+                    { x: NaN, y: NaN }
+                );
+            });
+            datasets.push({
+                type: 'line',
+                label: 'Error bars',
+                data: errSegments,
+                borderColor: 'rgba(200,200,200,0.5)',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                spanGaps: false,
+                fill: false
+            });
+
+            var gfdIdx = measurements.length;
+
+            var h0BandPlugin = {
+                id: 'h0GfdBand',
+                beforeDraw: function (chart) {
+                    if (!gfd.band_low || !gfd.band_high) return;
+                    var ctx = chart.ctx;
+                    var xScale = chart.scales.x;
+                    var yScale = chart.scales.y;
+                    var x1 = xScale.getPixelForValue(gfd.band_low);
+                    var x2 = xScale.getPixelForValue(gfd.band_high);
+                    var yTop = yScale.top;
+                    var yBot = yScale.bottom;
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(0,255,157,0.10)';
+                    ctx.fillRect(x1, yTop, x2 - x1, yBot - yTop);
+                    ctx.strokeStyle = 'rgba(0,255,157,0.30)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, yTop); ctx.lineTo(x1, yBot);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x2, yTop); ctx.lineTo(x2, yBot);
+                    ctx.stroke();
+                    if (gfd.one_loop) {
+                        var xc = xScale.getPixelForValue(gfd.one_loop);
+                        ctx.strokeStyle = 'rgba(0,255,157,0.50)';
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([4, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(xc, yTop); ctx.lineTo(xc, yBot);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                    ctx.restore();
+                }
+            };
+
+            if (gfd.one_loop) {
+                datasets.push({
+                    type: 'scatter',
+                    label: 'GFD (one-loop)',
+                    data: [{ x: gfd.one_loop, y: gfdIdx }],
+                    borderColor: '#00ff9d',
+                    backgroundColor: '#00ff9d',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    pointStyle: 'rectRot'
+                });
+            }
+
+            _apiDemoCharts[chartKey] = new Chart(canvas, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                plugins: [h0BandPlugin],
+                options: {
+                    animation: { duration: 300 },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'x',
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#aaa',
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                filter: function (item) {
+                                    var t = item.text || '';
+                                    return t.indexOf('Error') === -1
+                                        && t.indexOf('band fill') === -1
+                                        && t.indexOf('6.2%') === -1;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1b1b1b',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function (items) {
+                                    var idx = Math.round(items[0].raw.y);
+                                    if (idx >= 0 && idx < labels.length) return labels[idx];
+                                    return '';
+                                },
+                                label: function (item) {
+                                    if (item.raw.x == null || isNaN(item.raw.x)) return null;
+                                    return ' H0 = ' + Number(item.raw.x).toFixed(1) + ' km/s/Mpc';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'H0 (km/s/Mpc)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' },
+                            min: 60,
+                            max: 85
+                        },
+                        y: {
+                            type: 'linear',
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: {
+                                color: '#6a8a9a',
+                                callback: function (value) {
+                                    var idx = Math.round(value);
+                                    if (idx >= 0 && idx < labels.length && value === idx) {
+                                        return labels[idx];
+                                    }
+                                    return '';
+                                },
+                                stepSize: 1
+                            },
+                            min: -0.5,
+                            max: labels.length - 0.5,
+                            reverse: true
+                        }
+                    }
+                }
+            });
+        }
+
+        var _rcCharts = {};
+
+        function resolveApiUrl(url) {
+            var h = window.location.hostname;
+            var p = window.location.port;
+            var isLocal = (h === '127.0.0.1' || h === 'localhost') && (p === '5000' || p === '8080');
+            if (isLocal && url.indexOf('api.fielddynamics.org') !== -1) {
+                return url.replace('https://api.fielddynamics.org', 'http://127.0.0.1:8000');
+            }
+            return url;
+        }
+
+        function initRcExplorer(el) {
+            var catalogUrl = resolveApiUrl(el.getAttribute('data-catalog-url'));
+            var rcUrl = resolveApiUrl(el.getAttribute('data-rc-url'));
+            var select = el.querySelector('.rc-galaxy-select');
+            var timeBadge = el.querySelector('.rc-time');
+            var mainCanvas = el.querySelector('.rc-main-canvas');
+            var massCanvas = el.querySelector('.rc-mass-canvas');
+
+            if (!select || !mainCanvas || !massCanvas) return;
+
+            fetch(catalogUrl)
+                .then(function (r) { return r.json(); })
+                .then(function (catalog) {
+                    var galaxies = catalog.galaxies || [];
+                    galaxies.sort(function (a, b) {
+                        return a.name.localeCompare(b.name);
+                    });
+                    select.innerHTML = '<option value="">Select a galaxy...</option>';
+                    galaxies.forEach(function (g) {
+                        var opt = document.createElement('option');
+                        opt.value = g.name;
+                        var label = g.name;
+                        if (g.distance_mpc) label += '  (' + g.distance_mpc + ' Mpc)';
+                        if (g.quality) label += '  Q' + g.quality;
+                        opt.textContent = label;
+                        select.appendChild(opt);
+                    });
+                    select.disabled = false;
+
+                    var defaultGalaxy = el.getAttribute('data-default-galaxy') || '';
+                    if (defaultGalaxy) {
+                        for (var i = 0; i < select.options.length; i++) {
+                            if (select.options[i].value === defaultGalaxy) {
+                                select.value = defaultGalaxy;
+                                select.dispatchEvent(new Event('change'));
+                                break;
+                            }
+                        }
+                    }
+                })
+                .catch(function () {
+                    select.innerHTML = '<option value="">Failed to load catalog</option>';
+                });
+
+            select.addEventListener('change', function () {
+                var name = select.value;
+                if (!name) return;
+                select.disabled = true;
+                timeBadge.textContent = 'Loading...';
+
+                var t0 = performance.now();
+                fetch(rcUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        galaxy_name: name,
+                        frameworks: ['gfd', 'mond', 'cdm']
+                    })
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var elapsed = Math.round(performance.now() - t0);
+                    timeBadge.textContent = elapsed + ' ms';
+                    select.disabled = false;
+                    var xMax = 0;
+                    var obs = data.observed || {};
+                    var rObs = obs.radius_kpc || [];
+                    if (rObs.length) xMax = Math.max(xMax, rObs[rObs.length - 1]);
+                    (data.results || []).forEach(function (fw) {
+                        var ra = fw.radius_kpc || [];
+                        if (ra.length) xMax = Math.max(xMax, ra[ra.length - 1]);
+                    });
+                    xMax = Math.ceil(xMax * 1.05);
+
+                    renderRcMainChart(mainCanvas, data, name, xMax);
+                    renderRcEffectiveMassChart(massCanvas, data, name, xMax);
+                })
+                .catch(function (err) {
+                    timeBadge.textContent = 'Error: ' + err.message;
+                    select.disabled = false;
+                });
+            });
+        }
+
+        function renderRcMainChart(canvas, data, galaxyName, xMax) {
+            if (_rcCharts.main) _rcCharts.main.destroy();
+
+            var obs = data.observed || {};
+            var rObs = obs.radius_kpc || [];
+            var vObs = obs.v_obs_km_s || [];
+            var eObs = obs.e_v_obs_km_s || [];
+            var results = data.results || [];
+
+            var datasets = [];
+
+            datasets.push({
+                type: 'scatter',
+                label: 'Observed',
+                data: rObs.map(function (r, i) { return { x: r, y: vObs[i] }; }),
+                borderColor: '#ffffff',
+                backgroundColor: 'rgba(255,255,255,0.85)',
+                pointRadius: 3.5,
+                pointHoverRadius: 5,
+                showLine: false,
+                order: 10
+            });
+
+            if (eObs.length === rObs.length) {
+                datasets.push({
+                    type: 'line',
+                    label: 'Error upper',
+                    data: rObs.map(function (r, i) { return { x: r, y: vObs[i] + eObs[i] }; }),
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: false,
+                    borderDash: [2, 2],
+                    order: 20
+                });
+                datasets.push({
+                    type: 'line',
+                    label: 'Error lower',
+                    data: rObs.map(function (r, i) { return { x: r, y: vObs[i] - eObs[i] }; }),
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    fill: '-1',
+                    backgroundColor: 'rgba(255,255,255,0.04)',
+                    borderDash: [2, 2],
+                    order: 20
+                });
+            }
+
+            results.forEach(function (fw) {
+                var rFw = fw.radius_kpc || rObs;
+                var vPred = fw.v_predicted_km_s || [];
+                var fwColor = _apiDemoColors[fw.framework] || '#6ca0dc';
+                var rmsLabel = '';
+                if (fw.residuals && fw.residuals.rms_km_s != null) {
+                    rmsLabel = ' (RMS ' + parseFloat(fw.residuals.rms_km_s).toFixed(1) + ' km/s)';
+                }
+                datasets.push({
+                    type: 'line',
+                    label: fw.framework.toUpperCase() + rmsLabel,
+                    data: rFw.map(function (r, i) { return { x: r, y: vPred[i] }; }),
+                    borderColor: fwColor,
+                    borderWidth: 2.2,
+                    pointRadius: rFw.length > 100 ? 0 : 2,
+                    tension: 0.2,
+                    fill: false,
+                    order: 5
+                });
+            });
+
+            var vNewt = (results[0] || {}).v_newtonian_km_s;
+            var rGrid = (results[0] || {}).radius_kpc || rObs;
+            if (vNewt && vNewt.length) {
+                datasets.push({
+                    type: 'line',
+                    label: 'Newtonian',
+                    data: rGrid.map(function (r, i) { return { x: r, y: vNewt[i] }; }),
+                    borderColor: 'rgba(160,180,200,0.4)',
+                    borderWidth: 1.2,
+                    borderDash: [4, 4],
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: false,
+                    order: 15
+                });
+            }
+
+            _rcCharts.main = new Chart(canvas, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                options: {
+                    animation: { duration: 300 },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: galaxyName + ' Rotation Curve (Photometric)',
+                            color: '#ddd',
+                            font: { size: 14, weight: '600' },
+                            padding: { bottom: 12 }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#aaa',
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                pointStyle: 'line',
+                                filter: function (item) {
+                                    return item.text.indexOf('Error') === -1;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1b1b1b',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function (items) {
+                                    return 'r = ' + parseFloat(items[0].raw.x).toFixed(2) + ' kpc';
+                                },
+                                label: function (item) {
+                                    if (item.raw.y == null) return null;
+                                    return ' ' + item.dataset.label + ': ' + Number(item.raw.y).toFixed(1) + ' km/s';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: xMax || undefined,
+                            title: { display: true, text: 'Radius (kpc)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Velocity (km/s)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#6a8a9a' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatMassSI(value) {
+            if (value >= 1e12) return (value / 1e12).toFixed(1) + 'e12';
+            if (value >= 1e9)  return (value / 1e9).toFixed(1)  + 'e9';
+            if (value >= 1e6)  return (value / 1e6).toFixed(1)  + 'e6';
+            return value.toExponential(1);
+        }
+
+        function renderRcEffectiveMassChart(canvas, data, galaxyName, xMax) {
+            if (_rcCharts.mass) _rcCharts.mass.destroy();
+
+            var decode = data.decode || {};
+            var mDecoded = decode.m_decoded_msun || [];
+            var decodeRadius = (data.observed || {}).radius_kpc || [];
+            var decodeResiduals = decode.residuals || [];
+
+            if (!mDecoded.length && !decodeResiduals.length) {
+                var ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#666';
+                ctx.font = '13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(
+                    'Effective mass data not available (decode block missing from API response)',
+                    canvas.width / 2, canvas.height / 2
+                );
+                return;
+            }
+
+            var fwBarColors = {
+                gfd:  { bg: 'rgba(74,222,128,0.75)', border: '#4ade80' },
+                mond: { bg: 'rgba(245,158,11,0.75)', border: '#f59e0b' },
+                cdm:  { bg: 'rgba(167,139,250,0.75)', border: '#a78bfa' }
+            };
+            var fwLabels = { gfd: 'GFD / Decoded', mond: 'MOND / Decoded', cdm: 'CDM / Decoded' };
+            var showFw = ['gfd', 'mond', 'cdm'];
+
+            var residualsByFw = {};
+            decodeResiduals.forEach(function (dr) {
+                residualsByFw[(dr.framework || '').toLowerCase()] = dr;
+            });
+
+            var labels = [];
+            var barData = {};
+            showFw.forEach(function (fw) { barData[fw] = []; });
+
+            for (var i = 0; i < decodeRadius.length; i++) {
+                var r = decodeRadius[i];
+                var mDec = mDecoded[i];
+                if (!r || !mDec || mDec <= 0) continue;
+                labels.push(r.toFixed(1));
+
+                showFw.forEach(function (fw) {
+                    var dr = residualsByFw[fw];
+                    var mFwd = (dr && dr.m_forward_msun) ? dr.m_forward_msun[i] : null;
+                    if (mFwd && mFwd > 0 && mDec > 0) {
+                        barData[fw].push(mFwd / mDec);
+                    } else {
+                        barData[fw].push(null);
+                    }
+                });
+            }
+
+            var datasets = showFw.map(function (fw) {
+                var c = fwBarColors[fw];
+                return {
+                    label: fwLabels[fw],
+                    data: barData[fw],
+                    backgroundColor: c.bg,
+                    borderColor: c.border,
+                    borderWidth: 1,
+                    borderRadius: 2,
+                    barPercentage: 0.85,
+                    categoryPercentage: 0.8
+                };
+            });
+
+            var allRatios = [];
+            showFw.forEach(function (fw) {
+                barData[fw].forEach(function (v) { if (v != null) allRatios.push(v); });
+            });
+            var maxRatio = Math.max.apply(null, allRatios);
+            var yAxisMax;
+            if (maxRatio <= 2) yAxisMax = Math.ceil(maxRatio + 0.5);
+            else if (maxRatio <= 10) yAxisMax = Math.ceil(maxRatio * 1.15);
+            else if (maxRatio <= 50) yAxisMax = Math.ceil(maxRatio / 5) * 5 + 5;
+            else yAxisMax = Math.ceil(maxRatio / 10) * 10 + 10;
+
+            var oneLinePlugin = {
+                id: 'massRatioOneLine',
+                afterDraw: function (chart) {
+                    var yScale = chart.scales.y;
+                    var xScale = chart.scales.x;
+                    var ctx = chart.ctx;
+                    var yPx = yScale.getPixelForValue(1);
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(xScale.left, yPx);
+                    ctx.lineTo(xScale.right, yPx);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            };
+
+            _rcCharts.mass = new Chart(canvas, {
+                type: 'bar',
+                data: { labels: labels, datasets: datasets },
+                plugins: [oneLinePlugin],
+                options: {
+                    animation: { duration: 300 },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Mass Model / Decoded Mass Ratio',
+                            color: '#999',
+                            font: { size: 12, weight: '500' },
+                            padding: { bottom: 8 }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#aaa',
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1b1b1b',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function (items) {
+                                    return 'r = ' + items[0].label + ' kpc';
+                                },
+                                label: function (item) {
+                                    if (item.raw == null) return null;
+                                    return ' ' + item.dataset.label + ': ' + item.raw.toFixed(2) + 'x';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Radius (kpc)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                            ticks: { color: '#6a8a9a', font: { size: 10 } }
+                        },
+                        y: {
+                            min: 0,
+                            max: yAxisMax,
+                            title: { display: true, text: 'Mass Multiple (framework / decoded)', color: '#7a9ab8' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: {
+                                color: '#6a8a9a',
+                                callback: function (value) {
+                                    return value + 'x';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         function buildDocUrl(groupId, itemId, docKind) {
@@ -869,6 +2027,7 @@
         function applyTabVisibility(visibility) {
             tabVisibility = {
                 overview: true,
+                derivation: !!(visibility && visibility.derivation === true),
                 examples: !(visibility && visibility.examples === false),
                 validation: !(visibility && visibility.validation === false)
             };
@@ -1453,11 +2612,24 @@
                 if (hasSSR) {
                     runKatexOn(contentByTab.overview);
                     processFigureViewers(contentByTab.overview);
+                    initApiDemos(contentByTab.overview);
                     contentByTab.overview.removeAttribute('data-ssr');
                 } else {
                     var overviewDoc = await fetchDoc(groupId, itemId, 'overview');
                     renderMarkdown(contentByTab.overview, overviewDoc);
                     processFigureViewers(contentByTab.overview);
+                    initApiDemos(contentByTab.overview);
+                }
+
+                if (tabVisibility.derivation) {
+                    try {
+                        var derivationDoc = await fetchDoc(groupId, itemId, 'derivation');
+                        renderMarkdown(contentByTab.derivation, derivationDoc);
+                    } catch (e) {
+                        renderMarkdown(contentByTab.derivation, 'No derivation available.');
+                    }
+                } else {
+                    renderMarkdown(contentByTab.derivation, '');
                 }
 
                 if (tabVisibility.examples) {

@@ -1,0 +1,11 @@
+groupId: api_reference
+itemId: api_galaxy_catalog
+title: Galaxy Catalog
+order: 2
+status: draft
+content:
+  overview: overview.md
+
+tabs:
+  examples: false
+  validation: false

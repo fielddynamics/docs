@@ -54,8 +54,9 @@ NAV_GROUPS = {
     ],
     "gravitation": [
         "coupling_polynomial_structural_states",
-        "g_from_topology",
+        "field_equation",
         "constitutive_law_mu_x",
+        "g_from_topology",
         "poisson_scale_invariance",
         "covariant_completion",
         "bimetric_locking",
@@ -100,6 +101,16 @@ NAV_GROUPS = {
         "nucleosynthesis_tensions",
         "cmb_constraints",
         "structure_growth",
+    ],
+    "api_reference": [
+        "api_rotation_curves",
+        "api_galaxy_catalog",
+        "api_cosmology",
+    ],
+    "galactic_dynamics": [
+        "rotation_curves",
+        "decoded_velocity_to_effective_mass",
+        "radial_acceleration_relation",
     ],
 }
 
@@ -535,6 +546,12 @@ def create_app():
                 abort(404)
             return send_from_directory(item_dir, filename, mimetype="text/markdown")
 
+        if doc_kind == "derivation":
+            filename = "derivation.md"
+            if not os.path.isfile(os.path.join(item_dir, filename)):
+                abort(404)
+            return send_from_directory(item_dir, filename, mimetype="text/markdown")
+
         if doc_kind == "validation":
             entries = _read_validation_entries(item_dir)
             if not entries:
@@ -570,10 +587,11 @@ def create_app():
         if not os.path.isdir(item_dir):
             abort(404)
 
-        tabs = {"overview": True, "examples": False, "validation": True}
+        tabs = {"overview": True, "examples": False, "validation": True, "derivation": False}
         item_yaml = os.path.join(item_dir, "item.yaml")
         if os.path.isfile(item_yaml):
             in_tabs_section = False
+            in_content_section = False
             with open(item_yaml, "r", encoding="utf-8") as handle:
                 for raw_line in handle:
                     line = raw_line.rstrip("\n")
@@ -582,19 +600,32 @@ def create_app():
                         continue
                     if re.match(r"^tabs:\s*$", stripped):
                         in_tabs_section = True
+                        in_content_section = False
+                        continue
+                    if re.match(r"^content:\s*$", stripped):
+                        in_content_section = True
+                        in_tabs_section = False
                         continue
                     if in_tabs_section:
                         if not line.startswith("  "):
                             in_tabs_section = False
                             continue
                         match = re.match(
-                            r"^\s*(overview|examples|validation):\s*(true|false)\s*$",
+                            r"^\s*(overview|examples|validation|derivation):\s*(true|false)\s*$",
                             stripped,
                             re.IGNORECASE,
                         )
                         if match:
                             tab_name = match.group(1).lower()
                             tabs[tab_name] = match.group(2).lower() == "true"
+                    if in_content_section:
+                        if not line.startswith("  "):
+                            in_content_section = False
+                            continue
+                        if re.match(r"^\s*derivation:\s*\S+", stripped, re.IGNORECASE):
+                            derivation_file = os.path.join(item_dir, "derivation.md")
+                            if os.path.isfile(derivation_file):
+                                tabs["derivation"] = True
 
         tabs["examples"] = False
         validation_entries = _read_validation_entries(item_dir)
@@ -747,7 +778,12 @@ def create_app():
         return send_from_directory(images_dir, filename)
 
     def _serve_item_asset(framework_root, group_id, item_id, filename):
-        """Serve files from groups/<group>/items/<item>/assets/."""
+        """Serve files from groups/<group>/items/<item>/assets/.
+
+        HTML files are read and returned as a Response directly, bypassing
+        send_from_directory which some hosting platforms block for .html
+        extensions in non-static routes.
+        """
         if not _SAFE_ID_RE.match(group_id) or not _SAFE_ID_RE.match(item_id):
             abort(404)
         item_dir = _resolve_item_dir(framework_root, group_id, item_id)
@@ -757,8 +793,12 @@ def create_app():
         if not os.path.isdir(item_assets_dir):
             abort(404)
         if filename.endswith(".html"):
-            return send_from_directory(item_assets_dir, filename,
-                                       mimetype="text/html")
+            from werkzeug.utils import safe_join
+            filepath = safe_join(item_assets_dir, filename)
+            if not filepath or not os.path.isfile(filepath):
+                abort(404)
+            with open(filepath, "r", encoding="utf-8") as fh:
+                return Response(fh.read(), mimetype="text/html")
         return send_from_directory(item_assets_dir, filename)
 
     # ------------------------------------------------------------------
@@ -778,6 +818,14 @@ def create_app():
                 "loc": base + "/framework/" + item_id + "/",
                 "priority": "0.8",
             })
+            item_dir_for_sitemap = _resolve_item_dir(
+                framework_root, group_id, item_id
+            )
+            if os.path.isfile(os.path.join(item_dir_for_sitemap, "overview.md")):
+                urls.append({
+                    "loc": base + "/framework/md/" + item_id,
+                    "priority": "0.7",
+                })
             item_dir = _resolve_item_dir(framework_root, group_id, item_id)
             for entry in _read_validation_entries(item_dir):
                 filename = entry["path"].replace("tests/", "")
@@ -798,6 +846,42 @@ def create_app():
         lines.append("</urlset>")
         xml = "\n".join(lines)
         return Response(xml, mimetype="application/xml")
+
+    @app.route("/framework/md/")
+    def md_index():
+        """Plain-text index of all available markdown pages."""
+        lines = ["# Field Dynamics: Markdown Pages", ""]
+        for group_id, item_ids in NAV_GROUPS.items():
+            lines.append("## %s" % group_id)
+            for item_id in item_ids:
+                item_dir = _resolve_item_dir(framework_root, group_id, item_id)
+                overview_path = os.path.join(item_dir, "overview.md")
+                if os.path.isfile(overview_path):
+                    lines.append("  /framework/md/%s" % item_id)
+            lines.append("")
+        return Response("\n".join(lines), mimetype="text/plain; charset=utf-8")
+
+    @app.route("/framework/md/<item_id>")
+    @app.route("/framework/md/<item_id>/")
+    def md_page(item_id):
+        """Serve raw overview.md for any item by its ID alone."""
+        if not _SAFE_ID_RE.match(item_id):
+            abort(404)
+        group_id = ITEM_TO_GROUP.get(item_id)
+        if not group_id:
+            abort(404)
+        item_dir = _resolve_item_dir(framework_root, group_id, item_id)
+        overview_path = os.path.join(item_dir, "overview.md")
+        if not os.path.isfile(overview_path):
+            abort(404)
+        with open(overview_path, "r", encoding="utf-8") as fh:
+            content = fh.read()
+        header = (
+            "> Field Dynamics (GFD) Framework | "
+            "https://docs.fielddynamics.org | "
+            "Section: %s\n\n" % group_id.replace("_", " ").title()
+        )
+        return Response(header + content, mimetype="text/markdown; charset=utf-8")
 
     @app.route("/llms.txt")
     def llms_txt():
@@ -871,6 +955,23 @@ def create_app():
     @app.route("/framework/assets/<group_id>/<item_id>/<path:filename>")
     def framework_item_image(group_id, item_id, filename):
         return _serve_item_asset(framework_root, group_id, item_id, filename)
+
+    @app.route("/framework/interactive/<group_id>/<item_id>/<filename>")
+    def framework_interactive_figure(group_id, item_id, filename):
+        """Dedicated route for interactive HTML figures, served as Response
+        to avoid hosting-platform restrictions on .html in asset paths."""
+        if not _SAFE_ID_RE.match(group_id) or not _SAFE_ID_RE.match(item_id):
+            abort(404)
+        if not filename.endswith(".html"):
+            abort(404)
+        if not re.match(r"^[a-zA-Z0-9_.\-]+$", filename):
+            abort(404)
+        item_dir = _resolve_item_dir(framework_root, group_id, item_id)
+        filepath = os.path.join(item_dir, "assets", filename)
+        if not os.path.isfile(filepath):
+            abort(404)
+        with open(filepath, "r", encoding="utf-8") as fh:
+            return Response(fh.read(), mimetype="text/html")
 
     # ------------------------------------------------------------------
     # Page routes (versioned)

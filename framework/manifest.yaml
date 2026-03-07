@@ -46,33 +46,36 @@ groups:
       - itemId: coupling_polynomial_structural_states
         title: Coupling Polynomial and Structural States
         order: 1
-      - itemId: g_from_topology
-        title: G from Topology
+      - itemId: field_equation
+        title: The Field Equation
         order: 2
       - itemId: constitutive_law_mu_x
         title: Constitutive Law mu(x)
         order: 3
+      - itemId: g_from_topology
+        title: G from Topology
+        order: 4
       - itemId: poisson_scale_invariance
         title: Poisson Equation and Scale Invariance
-        order: 4
+        order: 5
       - itemId: covariant_completion
         title: Covariant Completion
-        order: 5
+        order: 6
       - itemId: bimetric_locking
         title: Bimetric Locking
-        order: 6
+        order: 7
       - itemId: weak_strong_field_limits
         title: Weak and Strong Field Limits
-        order: 7
+        order: 8
       - itemId: lensing_time_delay
         title: Lensing and Time Delay
-        order: 8
+        order: 9
       - itemId: thermodynamic_relations
         title: Thermodynamic Relations
-        order: 9
+        order: 10
       - itemId: action_prefactor_dictionary
         title: Action Prefactor Dictionary
-        order: 10
+        order: 11
   - groupId: fundamental_constants
     title: Fundamental Constants
     path: groups/fundamental_constants
@@ -183,3 +186,31 @@ groups:
       - itemId: structure_growth
         title: Structure Growth
         order: 5
+  - groupId: api_reference
+    title: API Reference
+    path: groups/api_reference
+    order: 8
+    items:
+      - itemId: api_rotation_curves
+        title: Rotation Curves
+        order: 1
+      - itemId: api_galaxy_catalog
+        title: Galaxy Catalog
+        order: 2
+      - itemId: api_cosmology
+        title: Cosmology
+        order: 3
+  - groupId: galactic_dynamics
+    title: Galactic Dynamics
+    path: groups/galactic_dynamics
+    order: 9
+    items:
+      - itemId: rotation_curves
+        title: Rotation Curves
+        order: 1
+      - itemId: decoded_velocity_to_effective_mass
+        title: Decoded Velocity to Effective Mass
+        order: 2
+      - itemId: radial_acceleration_relation
+        title: Radial Acceleration Relation
+        order: 3

@@ -1,7 +1,7 @@
 groupId: gravitation
 itemId: covariant_completion
 title: Covariant Completion
-order: 3
+order: 6
 status: draft
 content:
   overview: overview.md

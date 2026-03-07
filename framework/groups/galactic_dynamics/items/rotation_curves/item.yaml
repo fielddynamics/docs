@@ -1,0 +1,11 @@
+groupId: galactic_dynamics
+itemId: rotation_curves
+title: Rotation Curves & Effective Mass Decoded
+order: 1
+status: draft
+content:
+  overview: overview.md
+
+tabs:
+  examples: false
+  validation: false

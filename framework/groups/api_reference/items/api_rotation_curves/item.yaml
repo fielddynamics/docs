@@ -1,0 +1,11 @@
+groupId: api_reference
+itemId: api_rotation_curves
+title: Rotation Curves
+order: 1
+status: draft
+content:
+  overview: overview.md
+
+tabs:
+  examples: false
+  validation: false

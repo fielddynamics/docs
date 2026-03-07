@@ -1,0 +1,7 @@
+groupId: gravitation
+itemId: field_equation
+title: The Field Equation
+order: 2
+status: draft
+content:
+  overview: overview.md

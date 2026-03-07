@@ -1,0 +1,12 @@
+groupId: galactic_dynamics
+itemId: decoded_velocity_to_effective_mass
+title: Decoded Velocity to Effective Mass
+order: 2
+status: draft
+visible: false
+content:
+  overview: overview.md
+
+tabs:
+  examples: false
+  validation: false

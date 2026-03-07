@@ -5,6 +5,7 @@ order: 1
 status: draft
 content:
   overview: overview.md
+  derivation: derivation.md
   examples: examples.md
 tests:
   entrypoint: tests/validate.py

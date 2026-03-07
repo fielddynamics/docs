@@ -1,0 +1,12 @@
+groupId: galactic_dynamics
+itemId: radial_acceleration_relation
+title: Radial Acceleration Relation
+order: 3
+status: draft
+visible: false
+content:
+  overview: overview.md
+
+tabs:
+  examples: false
+  validation: false

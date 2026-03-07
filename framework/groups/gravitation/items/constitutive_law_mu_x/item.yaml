@@ -1,7 +1,7 @@
 groupId: gravitation
 itemId: constitutive_law_mu_x
 title: Constitutive Law mu(x)
-order: 5
+order: 3
 status: draft
 content:
   overview: overview.md

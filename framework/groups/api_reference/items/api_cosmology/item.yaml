@@ -1,0 +1,11 @@
+groupId: api_reference
+itemId: api_cosmology
+title: Cosmology
+order: 3
+status: draft
+content:
+  overview: overview.md
+
+tabs:
+  examples: false
+  validation: false
